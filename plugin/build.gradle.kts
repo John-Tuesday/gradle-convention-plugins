@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 plugins {
     `kotlin-dsl`
     alias(libs.plugins.gradle.plugin.publish)
+    signing
 }
 
 group = "io.github.john-tuesday"
@@ -80,6 +81,10 @@ testing {
             }
         }
     }
+}
+
+signing {
+    useGpgCmd()
 }
 
 gradlePlugin {
