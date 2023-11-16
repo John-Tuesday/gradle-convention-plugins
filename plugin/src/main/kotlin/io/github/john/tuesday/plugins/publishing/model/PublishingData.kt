@@ -45,4 +45,18 @@ public sealed class MavenRepository(
         override val PasswordPropKey: String = "ossrhPassword"
         override val PasswordEnvKey: String = PasswordPropKey
     }
+
+    public class GitHubPackage internal constructor(
+        owner: String,
+        repository: String,
+        name: String = "GitHubPackages",
+    ) : MavenRepository(
+        name = name,
+        url = "https://maven.pkg.github.com/$owner/$repository",
+    ) {
+        override val UsernamePropKey: String = "gpr.user"
+        override val UsernameEnvKey: String = "USERNAME"
+        override val PasswordPropKey: String = "grp.key"
+        override val PasswordEnvKey: String = "TOKEN"
+    }
 }
