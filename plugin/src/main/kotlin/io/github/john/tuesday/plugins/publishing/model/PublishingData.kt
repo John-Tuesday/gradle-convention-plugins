@@ -31,11 +31,18 @@ public sealed class MavenRepository(
     public val name: String,
     public val url: String,
 ) {
+    public abstract val UsernamePropKey: String
+    public abstract val UsernameEnvKey: String
+    public abstract val PasswordPropKey: String
+    public abstract val PasswordEnvKey: String
+
     public data object SonatypeStaging : MavenRepository(
         name = "sonatypeStaging",
         url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/",
     ) {
-        const val USERNAME_PROPERTY_KEY: String = "ossrhUsername"
-        const val PASSWORD_PROPERTY_KEY: String = "ossrhPassword"
+        override val UsernamePropKey: String = "ossrhUsername"
+        override val UsernameEnvKey: String = UsernamePropKey
+        override val PasswordPropKey: String = "ossrhPassword"
+        override val PasswordEnvKey: String = PasswordPropKey
     }
 }
