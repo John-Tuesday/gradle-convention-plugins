@@ -4,7 +4,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
     `kotlin-dsl`
-    alias(libs.plugins.gradle.plugin.publish)
     signing
 }
 
