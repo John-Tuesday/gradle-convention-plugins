@@ -13,3 +13,4 @@ pluginManagement {
 }
 
 rootProject.name = "plugin"
+include(":maven-publish-assist")
