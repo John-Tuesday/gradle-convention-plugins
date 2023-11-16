@@ -46,7 +46,7 @@ public sealed class MavenRepository(
         override val PasswordEnvKey: String = PasswordPropKey
     }
 
-    public class GitHubPackage internal constructor(
+    public class GitHubPackage(
         owner: String,
         repository: String,
         name: String = "GitHubPackages",
