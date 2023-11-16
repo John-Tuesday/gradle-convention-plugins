@@ -120,18 +120,44 @@ public sealed class MavenRepository(
     }
 }
 
+/***
+ * Provider with additional method [getOrError] to give a more transparent error
+ */
+public class ProviderWithErrorMessage<T>(
+    private val provider: Provider<T>,
+    public val errorMessage: String,
+) : Provider<T> by provider {
+
+    /**
+     * Checks if the value is present and returns it via [get] otherwise it runs [error]
+     */
+    public fun getOrError(): T = if (provider.isPresent) provider.get() else error(errorMessage)
+}
+
+/**
+ * Convert a regular [Provider] to a [ProviderWithErrorMessage]
+ */
+public fun <T> Provider<T>.withError(errorMessage: String): ProviderWithErrorMessage<T> {
+    return ProviderWithErrorMessage(provider = this, errorMessage = errorMessage)
+}
+
+
 /**
  * Provide username from [ProviderFactory.gradleProperty] or else [ProviderFactory.environmentVariable]
  */
-public fun ProviderFactory.username(repo: MavenRepository): Provider<String> {
-    return gradleProperty(repo.usernamePropKey).orElse(environmentVariable(repo.usernameEnvKey))
+public fun ProviderFactory.username(repo: MavenRepository): ProviderWithErrorMessage<String> {
+    return gradleProperty(repo.usernamePropKey)
+        .orElse(environmentVariable(repo.usernameEnvKey))
+        .withError("Could not find property '${repo.usernamePropKey}' and could not find environment variable '${repo.usernameEnvKey}'")
 }
 
 /**
  * Provide password from [ProviderFactory.gradleProperty] or else [ProviderFactory.environmentVariable]
  */
-public fun ProviderFactory.password(repo: MavenRepository): Provider<String> {
-    return gradleProperty(repo.passwordPropKey).orElse(environmentVariable(repo.passwordEnvKey))
+public fun ProviderFactory.password(repo: MavenRepository): ProviderWithErrorMessage<String> {
+    return gradleProperty(repo.passwordPropKey)
+        .orElse(environmentVariable(repo.passwordEnvKey))
+        .withError("Could not find property '${repo.passwordPropKey}' and could not find environment variable '${repo.passwordPropKey}'")
 }
 
 /**
@@ -143,8 +169,8 @@ public fun RepositoryHandler.maven(repo: MavenRepository, providers: ProviderFac
         url = URI(repo.url)
 
         credentials {
-            username = providers.username(repo).get()
-            password = providers.password(repo).get()
+            username = providers.username(repo).getOrError()
+            password = providers.password(repo).getOrError()
         }
     }
 }
