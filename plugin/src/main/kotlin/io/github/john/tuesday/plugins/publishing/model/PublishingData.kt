@@ -115,7 +115,7 @@ public sealed class MavenRepository(
     ) {
         override val usernamePropKey: String = "gpr.user"
         override val usernameEnvKey: String = "USERNAME"
-        override val passwordPropKey: String = "grp.key"
+        override val passwordPropKey: String = "gpr.key"
         override val passwordEnvKey: String = "TOKEN"
     }
 }
