@@ -5,6 +5,8 @@ import org.gradle.api.artifacts.VersionCatalog
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.attributes.TestSuiteType
 import org.gradle.api.plugins.jvm.JvmTestSuite
+import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
@@ -24,6 +26,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 internal val Project.libs
     get(): VersionCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
+
+internal fun ProviderFactory.propertyOrEnv(
+    propertyKey: String,
+    environmentKey: String = propertyKey,
+): Provider<String> = gradleProperty(propertyKey).orElse(environmentVariable(environmentKey))
 
 public data object Versions {
     public val java: JavaVersion = JavaVersion.VERSION_1_8
@@ -71,6 +78,14 @@ public class PluginsConventionPlugin : Plugin<Project> {
             val publishingExtension = extensions.getByType<PublishingExtension>()
             with(publishingExtension) {
                 repositories {
+                    maven {
+                        name = "SonatypeStaging"
+                        url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                        credentials {
+                            username = providers.propertyOrEnv("ossrhUsername").get()
+                            password = providers.propertyOrEnv("ossrhPassword").get()
+                        }
+                    }
                     maven {
                         name = "GitHubPackages"
                         url = uri("https://maven.pkg.github.com/john-tuesday/gradle-convention-plugins")
