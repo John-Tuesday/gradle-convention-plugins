@@ -93,7 +93,7 @@ public sealed class MavenRepository(
      * Sonatype Maven Repository for Staging
      */
     public data object SonatypeStaging : MavenRepository(
-        name = "sonatypeStaging",
+        name = "SonatypeStaging",
         url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/",
     ) {
         override val usernamePropKey: String = "ossrhUsername"
