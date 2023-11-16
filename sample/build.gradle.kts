@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
-    id("io.github.john-tuesday.maven-publish-assist")
 }
 
 kotlin {
