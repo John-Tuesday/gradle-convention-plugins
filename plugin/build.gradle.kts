@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "io.github.john-tuesday"
-version = "0.0.0"
+version = "0.1.0-SNAPSHOT"
 
 gradlePlugin {
     plugins {
