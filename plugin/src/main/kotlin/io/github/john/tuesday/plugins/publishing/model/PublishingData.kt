@@ -1,7 +1,11 @@
 package io.github.john.tuesday.plugins.publishing.model
 
+import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.publish.maven.MavenPomLicenseSpec
 import org.gradle.kotlin.dsl.assign
+import java.net.URI
 
 /**
  * Create, configure, and add license according to [license]
@@ -113,5 +117,34 @@ public sealed class MavenRepository(
         override val usernameEnvKey: String = "USERNAME"
         override val passwordPropKey: String = "grp.key"
         override val passwordEnvKey: String = "TOKEN"
+    }
+}
+
+/**
+ * Provide username from [ProviderFactory.gradleProperty] or else [ProviderFactory.environmentVariable]
+ */
+public fun ProviderFactory.username(repo: MavenRepository): Provider<String> {
+    return gradleProperty(repo.usernamePropKey).orElse(environmentVariable(repo.usernameEnvKey))
+}
+
+/**
+ * Provide password from [ProviderFactory.gradleProperty] or else [ProviderFactory.environmentVariable]
+ */
+public fun ProviderFactory.password(repo: MavenRepository): Provider<String> {
+    return gradleProperty(repo.passwordPropKey).orElse(environmentVariable(repo.passwordEnvKey))
+}
+
+/**
+ * Create new Maven repository from [repo] with properties resolved by [providers]
+ */
+public fun RepositoryHandler.maven(repo: MavenRepository, providers: ProviderFactory) {
+    maven {
+        name = repo.name
+        url = URI(repo.url)
+
+        credentials {
+            username = providers.username(repo).get()
+            password = providers.password(repo).get()
+        }
     }
 }
