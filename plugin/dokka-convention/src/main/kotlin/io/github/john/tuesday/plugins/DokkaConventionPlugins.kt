@@ -34,11 +34,12 @@ public class DokkaBaseConventionPlugin : Plugin<Project> {
 
             tasks.withType<AbstractDokkaLeafTask>().configureEach {
                 dokkaSourceSets.configureEach {
-                    includes.from("Module.md")
+                    val moduleDoc = objects.directoryProperty().file("Module.md").map { it.asFile }.filter { it.isFile }
+                    includes.from(moduleDoc)
                     reportUndocumented = repositoryDocumentation.reportUndocumented
 
                     sourceLink {
-                        localDirectory = layout.projectDirectory.file("src").asFile
+                        localDirectory = objects.directoryProperty().dir("src").map { it.asFile }
                         remoteUrl = repositoryDocumentation.documentationBaseUrl.map { URL("$it/src") }
                         remoteLineSuffix = "#L"
                     }
