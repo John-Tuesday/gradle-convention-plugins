@@ -31,6 +31,7 @@ public class DokkaBaseConventionPlugin : Plugin<Project> {
             }
 
             val repositoryDocumentation = extensions.create<RepositoryDocumentation>("repositoryDocumentation").apply {
+                documentationBaseUrl.convention("https://john-tuesday.github.io")
                 reportUndocumented.convention(true)
             }
 
