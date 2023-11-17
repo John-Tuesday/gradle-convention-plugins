@@ -30,7 +30,10 @@ public class DokkaBaseConventionPlugin : Plugin<Project> {
                 apply<DokkaPlugin>()
             }
 
-            val repositoryDocumentation = extensions.create<RepositoryDocumentation>("repositoryDocumentation")
+            val repositoryDocumentation = extensions.create<RepositoryDocumentation>("repositoryDocumentation").apply {
+                reportUndocumented.convention(true)
+            }
+
 
             tasks.withType<AbstractDokkaLeafTask>().configureEach {
                 dokkaSourceSets.configureEach {
