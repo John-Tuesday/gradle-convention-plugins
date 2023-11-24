@@ -39,6 +39,10 @@ kotlin {
 
 gradlePlugin {
     plugins {
+        val constantsSettingsPlugin by creating {
+            id = "build-logic.constants"
+            implementationClass = "ConstantsSettingsPlugin"
+        }
         val pluginsConventionPlugin by registering {
             id = "convention.plugins"
             implementationClass = "PluginsConventionPlugin"

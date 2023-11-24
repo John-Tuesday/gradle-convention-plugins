@@ -1,9 +1,10 @@
+import io.github.john.tuesday.build.logic.constants.PUBLISH_GROUP
+
 plugins {
     id("convention.plugins")
 }
 
-group = "io.github.john-tuesday"
-version = "0.1.0-SNAPSHOT"
+group = PUBLISH_GROUP
 version = pluginLibs.versions.mavenPublishAssist.get()
 
 gradlePlugin {

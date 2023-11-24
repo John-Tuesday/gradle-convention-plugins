@@ -15,6 +15,10 @@ pluginManagement {
     includeBuild("../build-logic")
 }
 
+plugins {
+    id("build-logic.constants")
+}
+
 rootProject.name = "plugin"
 include(":maven-publish-assist")
 include(":dokka-convention")
