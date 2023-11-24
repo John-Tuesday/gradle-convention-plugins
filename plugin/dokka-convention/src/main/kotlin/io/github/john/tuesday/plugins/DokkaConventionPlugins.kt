@@ -2,22 +2,25 @@ package io.github.john.tuesday.plugins
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.VersionCatalog
-import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.provider.Property
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.dokka.gradle.*
 import java.net.URL
 
+/**
+ * Configuration options for [DokkaBaseConventionPlugin]
+ */
 public interface RepositoryDocumentation {
-    public val documentationBaseUrl: Property<String>
-    public val reportUndocumented: Property<Boolean>
+    /**
+     * URL of the source code used in source link generation.
+     */
+    public val sourceBaseUrl: Property<String>
 }
 
 /**
  * Applies [DokkaPlugin] and includes "Module.md" per [DokkaTaskPartial] and per [DokkaMultiModuleTask].
- * SourceLink base directory is `./src` so [RepositoryDocumentation.documentationBaseUrl] should be `.` because `/src`
+ * SourceLink base directory is `./src` so [RepositoryDocumentation.sourceBaseUrl] should be `.` because `/src`
  * is automatically added.
  *
  * Output directory is set to `"docs/documentation"`, relative to the root project.
@@ -30,8 +33,7 @@ public class DokkaBaseConventionPlugin : Plugin<Project> {
             }
 
             val repositoryDocumentation = extensions.create<RepositoryDocumentation>("repositoryDocumentation").apply {
-                documentationBaseUrl.convention("https://john-tuesday.github.io")
-                reportUndocumented.convention(true)
+                sourceBaseUrl.convention("https://john-tuesday.github.io")
             }
 
 
@@ -39,11 +41,10 @@ public class DokkaBaseConventionPlugin : Plugin<Project> {
                 dokkaSourceSets.configureEach {
                     val moduleDoc = layout.projectDirectory.file("Module.md").asFile
                     if (moduleDoc.exists() && moduleDoc.isFile) includes.from(moduleDoc)
-                    reportUndocumented.convention(repositoryDocumentation.reportUndocumented)
 
                     sourceLink {
                         localDirectory.convention(layout.projectDirectory.dir("src").asFile)
-                        remoteUrl.convention(repositoryDocumentation.documentationBaseUrl.map { URL("$it/src") })
+                        remoteUrl.convention(repositoryDocumentation.sourceBaseUrl.map { URL("$it/src") })
                         remoteLineSuffix.convention("#L")
                     }
                 }
