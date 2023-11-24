@@ -22,6 +22,8 @@ public interface RepositoryDocumentation {
  * Applies [DokkaPlugin] and includes "Module.md" per [DokkaTaskPartial] and per [DokkaMultiModuleTask].
  * SourceLink base directory is `./src` so [RepositoryDocumentation.documentationBaseUrl] should be `.` because `/src`
  * is automatically added.
+ *
+ * Output directory is set to `"docs/documentation"`, relative to the root project.
  */
 public class DokkaBaseConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
