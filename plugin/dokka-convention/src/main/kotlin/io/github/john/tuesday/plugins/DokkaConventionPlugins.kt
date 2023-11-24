@@ -23,6 +23,10 @@ public interface RepositoryDocumentation {
  * SourceLink base directory is `./src` so [RepositoryDocumentation.sourceBaseUrl] should be `.` because `/src`
  * is automatically added.
  *
+ * Source base url default is
+ *
+ *     "https://github.com/John-Tuesday/${rootProject.name}/tree/main${project.path.replace(':', '/')}"
+ *
  * Output directory is set to `"docs/documentation"`, relative to the root project.
  */
 public class DokkaBaseConventionPlugin : Plugin<Project> {
@@ -33,7 +37,11 @@ public class DokkaBaseConventionPlugin : Plugin<Project> {
             }
 
             val repositoryDocumentation = extensions.create<RepositoryDocumentation>("repositoryDocumentation").apply {
-                sourceBaseUrl.convention("https://john-tuesday.github.io")
+                sourceBaseUrl.convention(
+                    "https://github.com/John-Tuesday/${rootProject.name}/tree/main${
+                        project.path.replace(':', '/')
+                    }"
+                )
             }
 
 
