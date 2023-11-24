@@ -1,0 +1,10 @@
+[versions]
+dokkaConvention = "0.0.0-SNAPSHOT"
+mavenPublishAssist = "0.1.0-SNAPSHOT"
+
+[libraries]
+
+[plugins]
+dokka-convention-base = { id = "io.github.john-tuesday.dokka-base-convention", version.ref = "dokkaConvention" }
+dokka-convention-html = { id = "io.github.john-tuesday.dokka-html", version.ref = "dokkaConvention" }
+maven-publish-assist = { id = "io.github.john-tuesday.maven-publish-assist", version.ref = "mavenPublishAssist" }

@@ -6,6 +6,9 @@ dependencyResolutionManagement {
         create("libs") {
             from(files("../gradle/libs.versions.toml"))
         }
+        val pluginLibs by creating {
+            from(files("plugin.libs.versions.toml"))
+        }
     }
 }
 pluginManagement {
