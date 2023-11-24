@@ -10,9 +10,6 @@ import org.gradle.kotlin.dsl.*
 import org.jetbrains.dokka.gradle.*
 import java.net.URL
 
-internal val Project.libs
-    get(): VersionCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
-
 public interface RepositoryDocumentation {
     public val documentationBaseUrl: Property<String>
     public val reportUndocumented: Property<Boolean>
