@@ -42,19 +42,19 @@ public class DokkaBaseConventionPlugin : Plugin<Project> {
                 dokkaSourceSets.configureEach {
                     val moduleDoc = layout.projectDirectory.file("Module.md").asFile
                     if (moduleDoc.exists() && moduleDoc.isFile) includes.from(moduleDoc)
-                    reportUndocumented = repositoryDocumentation.reportUndocumented
+                    reportUndocumented.convention(repositoryDocumentation.reportUndocumented)
 
                     sourceLink {
-                        localDirectory = layout.projectDirectory.dir("src").asFile
-                        remoteUrl = repositoryDocumentation.documentationBaseUrl.map { URL("$it/src") }
-                        remoteLineSuffix = "#L"
+                        localDirectory.convention(layout.projectDirectory.dir("src").asFile)
+                        remoteUrl.convention(repositoryDocumentation.documentationBaseUrl.map { URL("$it/src") })
+                        remoteLineSuffix.convention("#L")
                     }
                 }
             }
 
             val dokkaMultiModuleTask = tasks.withType<DokkaMultiModuleTask>()
             dokkaMultiModuleTask.configureEach {
-                outputDirectory = rootProject.layout.projectDirectory.dir("docs/documentation")
+                outputDirectory.convention(rootProject.layout.projectDirectory.dir("docs/documentation"))
                 val moduleDoc = layout.projectDirectory.file("Module.md").asFile
                 if (moduleDoc.exists() && moduleDoc.isFile) includes.from(moduleDoc)
             }
