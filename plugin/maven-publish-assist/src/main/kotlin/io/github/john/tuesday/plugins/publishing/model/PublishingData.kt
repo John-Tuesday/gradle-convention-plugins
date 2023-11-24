@@ -97,9 +97,9 @@ public sealed class MavenRepository(
         url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/",
     ) {
         override val usernamePropKey: String = "ossrhUsername"
-        override val usernameEnvKey: String = usernamePropKey
+        override val usernameEnvKey: String = "OSSRH_USERNAME"
         override val passwordPropKey: String = "ossrhPassword"
-        override val passwordEnvKey: String = passwordPropKey
+        override val passwordEnvKey: String = "OSSRH_PASSWORD"
     }
 
     /**
