@@ -5,7 +5,7 @@ import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import kotlin.test.Test
 
-class DokkaHtmlMultiModuleConventionPluginFunctionalTest {
+class DokkaHtmlConventionPluginFunctionalTest {
     @field:TempDir
     lateinit var projectDir: File
 

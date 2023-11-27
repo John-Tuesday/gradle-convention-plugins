@@ -8,7 +8,7 @@ import org.jetbrains.dokka.base.DokkaBase
 import org.jetbrains.dokka.gradle.AbstractDokkaTask
 import kotlin.test.*
 
-class DokkaHtmlMultiModuleConventionPluginUnitTest {
+class DokkaHtmlConventionPluginUnitTest {
     private lateinit var parentProject: Project
     private lateinit var project: Project
 
@@ -17,14 +17,14 @@ class DokkaHtmlMultiModuleConventionPluginUnitTest {
         parentProject = ProjectBuilder.builder().withName("parent").build()
         project = ProjectBuilder.builder().withParent(parentProject).build()
 
-        parentProject.plugins.apply(DokkaHtmlMultiModuleConventionPlugin::class.java)
-        project.plugins.apply(DokkaHtmlMultiModuleConventionPlugin::class.java)
+        parentProject.plugins.apply(DokkaHtmlConventionPlugin::class.java)
+        project.plugins.apply(DokkaHtmlConventionPlugin::class.java)
     }
 
     @Test
     fun `single project test`() {
         val p = ProjectBuilder.builder().build()
-        p.plugins.apply(DokkaHtmlMultiModuleConventionPlugin::class.java)
+        p.plugins.apply(DokkaHtmlConventionPlugin::class.java)
     }
 
     @Test
@@ -40,7 +40,7 @@ class DokkaHtmlMultiModuleConventionPluginUnitTest {
             assertNotNull(configMap)
             val dokkaBaseConfig = configMap[DokkaBase::class.qualifiedName!!]
             assertNotNull(dokkaBaseConfig)
-            assertEquals(dokkaBaseConfig, DokkaHtmlMultiModuleConventionPlugin.DOKKA_BASE_CONFIGURATION_DEFAULT)
+            assertEquals(dokkaBaseConfig, DokkaHtmlConventionPlugin.DOKKA_BASE_CONFIGURATION_DEFAULT)
         }
 
         project.tasks.withType<AbstractDokkaTask>()

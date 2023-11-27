@@ -105,7 +105,7 @@ public class DokkaBaseConventionPlugin : Plugin<Project> {
  *
  * Assumes rootProject has [DokkaPlugin] applied.
  */
-public class DokkaHtmlMultiModuleConventionPlugin : Plugin<Project> {
+public class DokkaHtmlConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             pluginManager.apply {

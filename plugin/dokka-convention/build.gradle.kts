@@ -26,11 +26,11 @@ gradlePlugin {
             description = "Simplify and streamline generating documentation"
             implementationClass = "io.github.john.tuesday.plugins.DokkaBaseConventionPlugin"
         }
-        val dokkaHtmlMultiModuleConventionPlugin by registering {
+        val dokkaHtmlConventionPlugin by registering {
             id = pluginLibs.plugins.dokka.convention.html.get().pluginId
             displayName = "Dokka html convention plugin"
             description = "Simplify and streamline generating multi-module html documentation"
-            implementationClass = "io.github.john.tuesday.plugins.DokkaHtmlMultiModuleConventionPlugin"
+            implementationClass = "io.github.john.tuesday.plugins.DokkaHtmlConventionPlugin"
         }
     }
 }
