@@ -1,19 +1,47 @@
 package io.github.john.tuesday.plugins
 
+import org.gradle.api.Project
 import org.gradle.kotlin.dsl.findByType
+import org.gradle.kotlin.dsl.withType
 import org.gradle.testfixtures.ProjectBuilder
-import kotlin.test.Test
-import kotlin.test.assertNotNull
+import org.jetbrains.dokka.base.DokkaBase
+import org.jetbrains.dokka.gradle.AbstractDokkaTask
+import kotlin.test.*
 
 class DokkaHtmlMultiModuleConventionPluginUnitTest {
-    @Test
-    fun `apply by type`() {
-        val rootProject = ProjectBuilder.builder().withName("parent").build()
-        val project = ProjectBuilder.builder().withParent(rootProject).build()
-        rootProject.plugins.apply(DokkaHtmlMultiModuleConventionPlugin::class.java)
-        project.plugins.apply(DokkaHtmlMultiModuleConventionPlugin::class.java)
+    private lateinit var parentProject: Project
+    private lateinit var project: Project
 
+    @BeforeTest
+    fun setUp() {
+        parentProject = ProjectBuilder.builder().withName("parent").build()
+        project = ProjectBuilder.builder().withParent(parentProject).build()
+
+        parentProject.plugins.apply(DokkaHtmlMultiModuleConventionPlugin::class.java)
+        project.plugins.apply(DokkaHtmlMultiModuleConventionPlugin::class.java)
+    }
+
+    @Test
+    fun `extensions are present`() {
         val repositoryDocumentation = project.extensions.findByType<RepositoryDocumentation>()
         assertNotNull(repositoryDocumentation)
+    }
+
+    @Test
+    fun `default html configuration is set`() {
+        fun AbstractDokkaTask.assertHtmlDefaultConfig() {
+            val configMap = pluginsMapConfiguration.orNull
+            assertNotNull(configMap)
+            val dokkaBaseConfig = configMap[DokkaBase::class.qualifiedName!!]
+            assertNotNull(dokkaBaseConfig)
+            assertEquals(dokkaBaseConfig, DokkaHtmlMultiModuleConventionPlugin.DOKKA_BASE_CONFIGURATION_DEFAULT)
+        }
+
+        project.tasks.withType<AbstractDokkaTask>()
+            .onEach { it.assertHtmlDefaultConfig() }
+            .also { assert(it.size > 0) }
+        project.rootProject.tasks.withType<AbstractDokkaTask>()
+            .onEach { it.assertHtmlDefaultConfig() }
+            .also { assert(it.size > 0) }
     }
 }

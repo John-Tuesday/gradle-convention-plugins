@@ -12,6 +12,7 @@ kotlin {
         val main by getting {
             dependencies {
                 implementation(libs.dokka.gradlePlugin)
+                implementation(libs.dokka.base)
             }
         }
     }

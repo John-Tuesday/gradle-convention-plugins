@@ -5,6 +5,7 @@ import org.gradle.api.Project
 import org.gradle.api.provider.Property
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.kotlin.dsl.*
+import org.jetbrains.dokka.base.DokkaBase
 import org.jetbrains.dokka.gradle.*
 import java.net.URL
 
@@ -69,8 +70,8 @@ public class DokkaBaseConventionPlugin : Plugin<Project> {
 }
 
 /**
- * Applies [DokkaBaseConventionPlugin] then sets each [PublishToMavenRepository] to dependsOn the rootProject's
- * dokkaHtmlMultiModule task.
+ * Applies [DokkaBaseConventionPlugin]. Configures each [AbstractDokkaTask] and sets configuration convention for
+ * [DokkaBase]. Sets each [PublishToMavenRepository] to dependsOn the rootProject's dokkaHtmlMultiModule task.
  *
  * Assumes rootProject has [DokkaPlugin] applied.
  */
@@ -83,9 +84,23 @@ public class DokkaHtmlMultiModuleConventionPlugin : Plugin<Project> {
 
             val dokkaHtmlMultiModuleTask = rootProject.tasks.named<DokkaMultiModuleTask>("dokkaHtmlMultiModule")
 
+            tasks.withType<AbstractDokkaTask>().configureEach {
+                pluginsMapConfiguration.convention(
+                    mapOf(DokkaBase::class.qualifiedName!! to DOKKA_BASE_CONFIGURATION_DEFAULT)
+                )
+            }
+
             tasks.withType<PublishToMavenRepository>().configureEach {
                 dependsOn(dokkaHtmlMultiModuleTask.get())
             }
         }
+    }
+
+    internal companion object {
+        internal const val DOKKA_BASE_CONFIGURATION_DEFAULT: String = """
+                {
+                    "separateInheritedMembers": true 
+                }
+                """
     }
 }
