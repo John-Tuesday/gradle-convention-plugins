@@ -2,9 +2,13 @@ package io.github.john.tuesday.plugins
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
-import org.gradle.kotlin.dsl.*
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.withType
 import org.jetbrains.dokka.base.DokkaBase
 import org.jetbrains.dokka.gradle.*
 import java.net.URL
@@ -17,6 +21,19 @@ public interface RepositoryDocumentation {
      * URL of the source code used in source link generation.
      */
     public val sourceBaseUrl: Property<String>
+
+    /**
+     * Default output directory for [DokkaTask] and [DokkaMultiModuleTask]
+     */
+    public val outputDir: DirectoryProperty
+
+}
+
+internal data object DokkaConventionDefaults {
+    const val MODULE_DOC_FILE_NAME: String = "Module.md"
+    const val PACKAGE_DOC_FILE_NAME: String = "Package.md"
+    const val OUTPUT_DIR_RELATIVE_PATH: String = "docs/documentation"
+    const val SOURCE_DIR_NAME: String = "src"
 }
 
 /**
@@ -43,27 +60,40 @@ public class DokkaBaseConventionPlugin : Plugin<Project> {
                         project.path.replace(':', '/')
                     }"
                 )
+
+                outputDir.convention(rootProject.layout.projectDirectory.dir(DokkaConventionDefaults.OUTPUT_DIR_RELATIVE_PATH))
             }
 
+            val moduleDocProvider = provider { layout.projectDirectory.file(DokkaConventionDefaults.MODULE_DOC_FILE_NAME).asFile }
+
+            fun GradleDokkaSourceSetBuilder.configure() {
+                val moduleDoc = moduleDocProvider.get()
+                if (moduleDoc.exists() && moduleDoc.isFile) includes.from(moduleDoc)
+
+                sourceLink {
+                    localDirectory.convention(layout.projectDirectory.dir(DokkaConventionDefaults.SOURCE_DIR_NAME).asFile)
+                    remoteUrl.convention(repositoryDocumentation.sourceBaseUrl.map { URL("$it/${DokkaConventionDefaults.SOURCE_DIR_NAME}") })
+                    remoteLineSuffix.convention("#L")
+                }
+            }
 
             tasks.withType<AbstractDokkaLeafTask>().configureEach {
-                dokkaSourceSets.configureEach {
-                    val moduleDoc = layout.projectDirectory.file("Module.md").asFile
-                    if (moduleDoc.exists() && moduleDoc.isFile) includes.from(moduleDoc)
-
-                    sourceLink {
-                        localDirectory.convention(layout.projectDirectory.dir("src").asFile)
-                        remoteUrl.convention(repositoryDocumentation.sourceBaseUrl.map { URL("$it/src") })
-                        remoteLineSuffix.convention("#L")
-                    }
-                }
+                dokkaSourceSets.configureEach { configure() }
             }
 
             val dokkaMultiModuleTask = tasks.withType<DokkaMultiModuleTask>()
             dokkaMultiModuleTask.configureEach {
-                outputDirectory.convention(rootProject.layout.projectDirectory.dir("docs/documentation"))
-                val moduleDoc = layout.projectDirectory.file("Module.md").asFile
+                outputDirectory.convention(repositoryDocumentation.outputDir)
+
+                val moduleDoc = moduleDocProvider.get()
                 if (moduleDoc.exists() && moduleDoc.isFile) includes.from(moduleDoc)
+            }
+
+            val dokkaSingleModuleTask = tasks.withType<DokkaTask>()
+            dokkaSingleModuleTask.configureEach {
+                outputDirectory.convention(repositoryDocumentation.outputDir)
+
+                dokkaSourceSets.configureEach { configure() }
             }
         }
     }
@@ -82,16 +112,22 @@ public class DokkaHtmlMultiModuleConventionPlugin : Plugin<Project> {
                 apply<DokkaBaseConventionPlugin>()
             }
 
-            val dokkaHtmlMultiModuleTask = rootProject.tasks.named<DokkaMultiModuleTask>("dokkaHtmlMultiModule")
-
             tasks.withType<AbstractDokkaTask>().configureEach {
                 pluginsMapConfiguration.convention(
                     mapOf(DokkaBase::class.qualifiedName!! to DOKKA_BASE_CONFIGURATION_DEFAULT)
                 )
             }
 
+            val dokkaHtmlMultiOrSingleModuleTask = provider { childProjects.isNotEmpty() }.flatMap { isMultiProject ->
+                if (isMultiProject)
+                    rootProject.tasks.named<DokkaMultiModuleTask>("dokkaHtmlMultiModule")
+                else
+                    rootProject.tasks.named<DokkaTask>("dokkaHtml")
+            }
+
+
             tasks.withType<PublishToMavenRepository>().configureEach {
-                dependsOn(dokkaHtmlMultiModuleTask.get())
+                dependsOn(dokkaHtmlMultiOrSingleModuleTask.get())
             }
         }
     }

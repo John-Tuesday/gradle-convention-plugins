@@ -22,6 +22,12 @@ class DokkaHtmlMultiModuleConventionPluginUnitTest {
     }
 
     @Test
+    fun `single project test`() {
+        val p = ProjectBuilder.builder().build()
+        p.plugins.apply(DokkaHtmlMultiModuleConventionPlugin::class.java)
+    }
+
+    @Test
     fun `extensions are present`() {
         val repositoryDocumentation = project.extensions.findByType<RepositoryDocumentation>()
         assertNotNull(repositoryDocumentation)
