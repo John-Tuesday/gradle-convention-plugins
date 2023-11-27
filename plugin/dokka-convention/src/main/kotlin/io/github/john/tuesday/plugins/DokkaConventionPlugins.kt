@@ -29,10 +29,28 @@ public interface RepositoryDocumentation {
 
 }
 
+/**
+ * Default constants used by [DokkaBaseConventionPlugin]
+ */
 internal data object DokkaConventionDefaults {
+    /**
+     * File name of a markdown module documentation file
+     */
     const val MODULE_DOC_FILE_NAME: String = "Module.md"
+
+    /**
+     * File name of a markdown package documentation file
+     */
     const val PACKAGE_DOC_FILE_NAME: String = "Package.md"
+
+    /**
+     * Output directory path relative to root project
+     */
     const val OUTPUT_DIR_RELATIVE_PATH: String = "docs/documentation"
+
+    /**
+     * Path to source files relative to a project directory
+     */
     const val SOURCE_DIR_NAME: String = "src"
 }
 
@@ -133,6 +151,9 @@ public class DokkaHtmlConventionPlugin : Plugin<Project> {
     }
 
     internal companion object {
+        /**
+         * JSON configuration default for [DokkaBase] (html output)
+         */
         internal const val DOKKA_BASE_CONFIGURATION_DEFAULT: String = """
                 {
                     "separateInheritedMembers": true 
