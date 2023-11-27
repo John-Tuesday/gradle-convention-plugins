@@ -1,5 +1,5 @@
 [versions]
-dokkaConvention = "0.0.0-SNAPSHOT"
+dokkaConvention = "0.1.0-SNAPSHOT"
 mavenPublishAssist = "0.1.0-SNAPSHOT"
 
 [libraries]
