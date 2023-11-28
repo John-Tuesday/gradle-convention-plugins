@@ -30,6 +30,7 @@ kotlin {
         val main by getting {
             dependencies {
                 implementation("org.gradle.kotlin:gradle-kotlin-dsl-plugins:$expectedKotlinDslPluginsVersion")
+                implementation(libs.dokka.gradlePlugin)
                 compileOnly(libs.kotlin.gradlePlugin)
                 compileOnly(libs.kotlin.multiplatform.gradlePlugin)
             }

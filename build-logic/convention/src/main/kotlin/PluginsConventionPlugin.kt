@@ -19,6 +19,7 @@ import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.plugins.signing.SigningPlugin
 import org.gradle.testing.base.TestingExtension
+import org.jetbrains.dokka.gradle.DokkaPlugin
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
@@ -47,6 +48,7 @@ public class PluginsConventionPlugin : Plugin<Project> {
                 apply<KotlinDslPlugin>()
                 apply("maven-publish")
                 apply<SigningPlugin>()
+                apply<DokkaPlugin>()
             }
             val compileOnly by configurations.existing {
                 defaultDependencies {
