@@ -30,7 +30,9 @@ internal val Project.libs
 internal fun ProviderFactory.propertyOrEnv(
     propertyKey: String,
     environmentKey: String = propertyKey,
-): Provider<String> = gradleProperty(propertyKey).orElse(environmentVariable(environmentKey))
+): Provider<String> = gradleProperty(propertyKey)
+    .orElse(environmentVariable(environmentKey))
+    .orElse(provider { error("Expected to find property '$propertyKey' or environment variable '$environmentKey' but found nothing.") })
 
 public data object Versions {
     public val java: JavaVersion = JavaVersion.VERSION_1_8
@@ -82,16 +84,28 @@ public class PluginsConventionPlugin : Plugin<Project> {
                         name = "SonatypeStaging"
                         url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
                         credentials {
-                            username = providers.propertyOrEnv("ossrhUsername").get()
-                            password = providers.propertyOrEnv("ossrhPassword").get()
+                            username = providers.propertyOrEnv(
+                                propertyKey = "ossrhUsername",
+                                environmentKey = "OSSRH_USERNAME",
+                            ).get()
+                            password = providers.propertyOrEnv(
+                                propertyKey = "ossrhPassword",
+                                environmentKey = "OSSRH_PASSWORD",
+                            ).get()
                         }
                     }
                     maven {
                         name = "GitHubPackages"
                         url = uri("https://maven.pkg.github.com/john-tuesday/gradle-convention-plugins")
                         credentials {
-                            username = findProperty("gpr.user")?.toString() ?: System.getenv("USERNAME")
-                            password = findProperty("gpr.key")?.toString() ?: System.getenv("TOKEN")
+                            username = providers.propertyOrEnv(
+                                propertyKey = "gpr.user",
+                                environmentKey = "USERNAME",
+                            ).get()
+                            password = providers.propertyOrEnv(
+                                propertyKey = "gpr.key",
+                                environmentKey = "TOKEN",
+                            ).get()
                         }
                     }
                 }
