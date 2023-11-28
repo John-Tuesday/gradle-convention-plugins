@@ -1,0 +1,33 @@
+name: Release version
+
+on:
+  push:
+    tags:
+      - v[0-9]*
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "$GITHUB_REF_NAME" --generate-notes
+
+  publish-plugins:
+    permissions:
+      packages: write
+      contents: read
+    strategy:
+      matrix:
+        project: [ "maven-publish-assist", "dokka-convention" ]
+    uses: ./.github/workflows/publish-maven.yml
+    with:
+      project: ${{ matrix.project }}
+    secrets: inherit
