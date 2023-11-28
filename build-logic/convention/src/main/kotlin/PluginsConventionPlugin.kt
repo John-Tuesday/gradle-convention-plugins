@@ -117,7 +117,27 @@ public class PluginsConventionPlugin : Plugin<Project> {
 
             val signingExtension = extensions.getByType<SigningExtension>()
             signingExtension.apply {
-                useGpgCmd()
+                val gpgKeyName = providers.gradleProperty("signing.gnupg.keyName")
+                val gpgPassphrase = providers.gradleProperty("signing.gnupg.passphrase")
+                if (gpgKeyName.isPresent && gpgPassphrase.isPresent)
+                    useGpgCmd()
+                else {
+                    val keyId = providers
+                        .gradleProperty("signing.keyId")
+                        .orElse(providers.environmentVariable("GPG_SIGNING_KEY_ID"))
+                    val password = providers.propertyOrEnv(
+                        propertyKey = "signing.password",
+                        environmentKey = "GPG_SIGNING_PASSWORD",
+                    )
+                    val key = providers.propertyOrEnv(
+                        propertyKey = "GPG_SECRET_KEY",
+                        environmentKey = "GPG_SECRET_KEY",
+                    )
+                    if (keyId.isPresent)
+                        useInMemoryPgpKeys(keyId.get(), key.get(), password.get())
+                    else
+                        useInMemoryPgpKeys(key.get(), password.get())
+                }
                 sign(publishingExtension.publications)
             }
 
