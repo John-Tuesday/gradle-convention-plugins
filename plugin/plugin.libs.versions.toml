@@ -1,6 +1,6 @@
 [versions]
-dokkaConvention = "0.1.0-alpha01"
-mavenPublishAssist = "0.1.0-alpha01"
+dokkaConvention = "0.1.0-alpha02"
+mavenPublishAssist = "0.1.0-alpha02"
 
 [libraries]
 
