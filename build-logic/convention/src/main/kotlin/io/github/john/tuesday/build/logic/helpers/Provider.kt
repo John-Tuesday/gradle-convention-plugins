@@ -8,6 +8,7 @@ import org.gradle.plugins.signing.SigningExtension
 
 public fun ProviderFactory.propOrEnv(propertyKey: String, environmentKey: String): ProviderWithError<String> =
     gradleProperty(propertyKey)
+        .orElse(systemProperty(propertyKey))
         .orElse(environmentVariable(environmentKey))
         .withError("Expected property with key '$propertyKey' or environment variable '$environmentKey' to be set.")
 

@@ -5,6 +5,7 @@ import org.gradle.api.provider.ProviderFactory
 
 public fun ProviderFactory.propOrEnv(propertyKey: String, environmentKey: String): ProviderWithError<String> =
     gradleProperty(propertyKey)
+        .orElse(systemProperty(propertyKey))
         .orElse(environmentVariable(environmentKey))
         .withError("Expected property with key '$propertyKey' or environment variable '$environmentKey' to be set.")
 
