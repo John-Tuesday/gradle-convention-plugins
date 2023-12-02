@@ -135,6 +135,22 @@ public class PluginsConventionPlugin : Plugin<Project> {
                 vcsUrl = "https://github.com/John-Tuesday/gradle-convention-plugins"
             }
             gradlePluginExtension.testSourceSets.add(functionalTest.map { it.sources }.get())
+            val publish by tasks.getting
+            val publishAllToGitHub = tasks.named("publishAllPublicationsTo${GitHubPackages.defaultName}Repository")
+            val publishAllToSonatype = tasks.named("publishAllPublicationsTo${SonatypeStaging.defaultName}Repository")
+
+            val publishChildren by rootProject.tasks.getting
+            publishChildren.dependsOn(publish)
+            rootProject.tasks.maybeCreate("publishChildrenTo${GitHubPackages.defaultName}Repository").apply {
+                dependsOn(publishAllToGitHub)
+                group = "publishing"
+                description = "publish all publications produced by subprojects to ${GitHubPackages.defaultName}"
+            }
+            rootProject.tasks.maybeCreate("publishChildrenTo${SonatypeStaging.defaultName}Repository").apply {
+                dependsOn(publishAllToSonatype)
+                group = "publishing"
+                description = "publish all publications produced by subprojects to ${SonatypeStaging.defaultName}"
+            }
 
             val check by tasks.existing
             check.configure {
