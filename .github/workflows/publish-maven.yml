@@ -46,9 +46,15 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '8'
-          cache: 'gradle'
+
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v1.1.0
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2.10.0
 
       - name: Publish to GitHub Packages
+        shell: bash
         if: ${{ inputs.github-packages || inputs.sonatype }}
         env:
           TASK: ${{ (inputs.github-packages && inputs.sonatype) && 'publish' || (inputs.github-packages && 'publishAllPublicationsToGitHubPackagesRepository' || 'publishAllPublicationsToSonatypeStagingRepository') }}
