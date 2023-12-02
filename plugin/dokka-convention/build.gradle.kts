@@ -20,11 +20,17 @@ kotlin {
 
 gradlePlugin {
     plugins {
-        val dokkaConventionPlugin by registering {
+        val dokkaBaseConventionPlugin by registering {
             id = pluginLibs.plugins.dokka.convention.base.get().pluginId
             displayName = "Dokka base convention plugin"
             description = "Simplify and streamline generating documentation"
             implementationClass = "io.github.john.tuesday.plugins.DokkaBaseConventionPlugin"
+        }
+        val dokkaConventionPlugin by registering {
+            id = pluginLibs.plugins.dokka.convention.convention.get().pluginId
+            displayName = "Dokka convention plugin"
+            description = "Simplify and streamline generating documentation"
+            implementationClass = "io.github.john.tuesday.plugins.DokkaConventionPlugin"
         }
         val dokkaHtmlConventionPlugin by registering {
             id = pluginLibs.plugins.dokka.convention.html.get().pluginId

@@ -2,13 +2,12 @@ package io.github.john.tuesday.plugins
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.provider.Property
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
-import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.withType
+import org.gradle.kotlin.dsl.*
 import org.jetbrains.dokka.base.DokkaBase
 import org.jetbrains.dokka.gradle.*
 import java.net.URL
@@ -118,7 +117,29 @@ public class DokkaBaseConventionPlugin : Plugin<Project> {
 }
 
 /**
- * Applies [DokkaBaseConventionPlugin]. Configures each [AbstractDokkaTask] and sets configuration convention for
+ * Conventions including non-configurable ones
+ *
+ * 1. Applies [DokkaBaseConventionPlugin] and [BasePlugin]
+ * 2. Configures each [AbstractDokkaTask] to [Task.dependsOn] the `check` lifecycle task
+ */
+public class DokkaConventionPlugin : Plugin<Project> {
+    override fun apply(target: Project) {
+        with(target) {
+            pluginManager.apply {
+                apply<BasePlugin>()
+                apply<DokkaBaseConventionPlugin>()
+            }
+
+            val check by tasks.existing
+            tasks.withType<AbstractDokkaTask>().configureEach {
+                dependsOn(check)
+            }
+        }
+    }
+}
+
+/**
+ * Applies [DokkaConventionPlugin]. Configures each [AbstractDokkaTask] and sets configuration convention for
  * [DokkaBase]. Sets each [PublishToMavenRepository] to dependsOn the rootProject's dokkaHtmlMultiModule task.
  *
  * Assumes rootProject has [DokkaPlugin] applied.
@@ -127,7 +148,7 @@ public class DokkaHtmlConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             pluginManager.apply {
-                apply<DokkaBaseConventionPlugin>()
+                apply<DokkaConventionPlugin>()
             }
 
             tasks.withType<AbstractDokkaTask>().configureEach {

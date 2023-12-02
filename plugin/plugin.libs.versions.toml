@@ -4,6 +4,7 @@ shared = "0.1.0-alpha02"
 [libraries]
 
 [plugins]
+dokka-convention-convention = { id = "io.github.john-tuesday.dokka-convention", version.ref = "shared" }
 dokka-convention-base = { id = "io.github.john-tuesday.dokka-base-convention", version.ref = "shared" }
 dokka-convention-html = { id = "io.github.john-tuesday.dokka-html", version.ref = "shared" }
 helper-settings = { id = "io.github.john-tuesday.helper.settings", version.ref = "shared" }
