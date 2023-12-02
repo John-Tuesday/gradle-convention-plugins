@@ -56,8 +56,8 @@ jobs:
       - name: Publish to GitHub Packages
         shell: bash
         if: ${{ inputs.github-packages || inputs.sonatype }}
-        continue-on-error: ${{ inputs.strict-publish }}
+        continue-on-error: ${{ ! inputs.strict-publish }}
         env:
-          CONTINUE: ${{ inputs.strict-publish && '--continue' || '' }}
+          CONTINUE: ${{ inputs.strict-publish && '' || '--continue' }}
           TASK: ${{ (inputs.github-packages && inputs.sonatype) && 'publishChildren' || (inputs.github-packages && 'publishChildrenToGitHubPackagesRepository' || 'publishChildrenToSonatypeStagingRepository') }}
         run: ./gradlew :plugin:"$TASK" "$CONTINUE"
