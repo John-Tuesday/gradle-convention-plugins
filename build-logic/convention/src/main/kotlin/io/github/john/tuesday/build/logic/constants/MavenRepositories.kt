@@ -25,7 +25,7 @@ public data object SonatypeStaging : MavenRepository(
 
 public data object GitHubPackages : MavenRepository(
     defaultName = "GitHubPackages",
-    url = URI("https://maven.pkg.github.com/john-tuesday/*"),
+    url = URI("https://maven.pkg.github.com/john-tuesday/gradle-convention-plugins"),
     usernamePropertyKey = "gpr.user",
     usernameEnvironmentKey = "GPR_USERNAME",
     passwordPropertyKey = "gpr.key",
