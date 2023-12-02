@@ -6,4 +6,6 @@ shared = "0.1.0-alpha02"
 [plugins]
 dokka-convention-base = { id = "io.github.john-tuesday.dokka-base-convention", version.ref = "shared" }
 dokka-convention-html = { id = "io.github.john-tuesday.dokka-html", version.ref = "shared" }
+helper-settings = { id = "io.github.john-tuesday.helper.settings", version.ref = "shared" }
+helper-project = { id = "io.github.john-tuesday.helper.project", version.ref = "shared" }
 maven-publish-assist = { id = "io.github.john-tuesday.maven-publish-assist", version.ref = "shared" }

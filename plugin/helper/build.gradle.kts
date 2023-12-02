@@ -5,17 +5,17 @@ plugins {
 }
 
 group = PUBLISH_GROUP
-version = pluginLibs.versions.mavenPublishAssist.get()
+version = pluginLibs.versions.shared.get()
 
 gradlePlugin {
     plugins {
         val gradleHelperSettingsPlugin by registering {
-            id = "$PUBLISH_GROUP.helper"
+            id = pluginLibs.plugins.helper.settings.get().pluginId
             implementationClass = "io.github.john.tuesday.plugins.GradleHelperSettingsPlugin"
         }
 
         val gradleHelperProjectPlugin by registering {
-            id = "$PUBLISH_GROUP.helper.project"
+            id = pluginLibs.plugins.helper.project.get().pluginId
             implementationClass = "io.github.john.tuesday.plugins.GradleHelperProjectPlugin"
         }
     }
