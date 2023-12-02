@@ -22,3 +22,4 @@ plugins {
 rootProject.name = "plugin"
 include(":maven-publish-assist")
 include(":dokka-convention")
+include(":helper")

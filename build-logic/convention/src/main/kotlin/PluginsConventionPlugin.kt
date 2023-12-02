@@ -1,3 +1,7 @@
+import io.github.john.tuesday.build.logic.constants.GitHubPackages
+import io.github.john.tuesday.build.logic.constants.SonatypeStaging
+import io.github.john.tuesday.build.logic.constants.usePreset
+import io.github.john.tuesday.build.logic.helpers.useGpgOrInMemoryPgp
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -5,8 +9,6 @@ import org.gradle.api.artifacts.VersionCatalog
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.attributes.TestSuiteType
 import org.gradle.api.plugins.jvm.JvmTestSuite
-import org.gradle.api.provider.Provider
-import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
@@ -27,13 +29,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 internal val Project.libs
     get(): VersionCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
-
-internal fun ProviderFactory.propertyOrEnv(
-    propertyKey: String,
-    environmentKey: String = propertyKey,
-): Provider<String> = gradleProperty(propertyKey)
-    .orElse(environmentVariable(environmentKey))
-    .orElse(provider { error("Expected to find property '$propertyKey' or environment variable '$environmentKey' but found nothing.") })
 
 public data object Versions {
     public val java: JavaVersion = JavaVersion.VERSION_1_8
@@ -83,32 +78,10 @@ public class PluginsConventionPlugin : Plugin<Project> {
             with(publishingExtension) {
                 repositories {
                     maven {
-                        name = "SonatypeStaging"
-                        url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-                        credentials {
-                            username = providers.propertyOrEnv(
-                                propertyKey = "ossrhUsername",
-                                environmentKey = "OSSRH_USERNAME",
-                            ).get()
-                            password = providers.propertyOrEnv(
-                                propertyKey = "ossrhPassword",
-                                environmentKey = "OSSRH_PASSWORD",
-                            ).get()
-                        }
+                        usePreset(SonatypeStaging, providers)
                     }
                     maven {
-                        name = "GitHubPackages"
-                        url = uri("https://maven.pkg.github.com/john-tuesday/gradle-convention-plugins")
-                        credentials {
-                            username = providers.propertyOrEnv(
-                                propertyKey = "gpr.user",
-                                environmentKey = "USERNAME",
-                            ).get()
-                            password = providers.propertyOrEnv(
-                                propertyKey = "gpr.key",
-                                environmentKey = "TOKEN",
-                            ).get()
-                        }
+                        usePreset(GitHubPackages, providers)
                     }
                 }
             }
@@ -119,27 +92,7 @@ public class PluginsConventionPlugin : Plugin<Project> {
 
             val signingExtension = extensions.getByType<SigningExtension>()
             signingExtension.apply {
-                val gpgKeyName = providers.gradleProperty("signing.gnupg.keyName")
-                val gpgPassphrase = providers.gradleProperty("signing.gnupg.passphrase")
-                if (gpgKeyName.isPresent && gpgPassphrase.isPresent)
-                    useGpgCmd()
-                else {
-                    val keyId = providers
-                        .gradleProperty("signing.keyId")
-                        .orElse(providers.environmentVariable("GPG_SIGNING_KEY_ID"))
-                    val password = providers.propertyOrEnv(
-                        propertyKey = "signing.password",
-                        environmentKey = "GPG_SIGNING_PASSWORD",
-                    )
-                    val key = providers.propertyOrEnv(
-                        propertyKey = "GPG_SECRET_KEY",
-                        environmentKey = "GPG_SECRET_KEY",
-                    )
-                    if (keyId.isPresent)
-                        useInMemoryPgpKeys(keyId.get(), key.get(), password.get())
-                    else
-                        useInMemoryPgpKeys(key.get(), password.get())
-                }
+                useGpgOrInMemoryPgp(providers)
                 sign(publishingExtension.publications)
             }
 

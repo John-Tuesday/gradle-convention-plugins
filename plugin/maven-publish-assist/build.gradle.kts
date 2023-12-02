@@ -7,6 +7,10 @@ plugins {
 group = PUBLISH_GROUP
 version = pluginLibs.versions.mavenPublishAssist.get()
 
+dependencies {
+    implementation(project(":helper"))
+}
+
 gradlePlugin {
     plugins {
         val mavenPublishAssist by registering {

@@ -1,11 +1,7 @@
-package io.github.john.tuesday.build.logic.constants
+package io.github.john.tuesday.plugins.helper
 
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.plugins.signing.SigningExtension
-
-/**
- * Base group string for Maven publications
- */
-public const val PUBLISH_GROUP: String = "io.github.john-tuesday"
 
 /**
  * Property keys and environment variables used to find values when using [SigningExtension.useGpgCmd]
@@ -55,4 +51,33 @@ public data object PgpInMemoryKeys {
      * Environment variable holding key id used to sign with [SigningExtension.useInMemoryPgpKeys]
      */
     public const val KEY_ID_ENVIRONMENT: String = "GPG_SIGNING_KEY_ID"
+}
+
+/**
+ * Use [SigningExtension.useGpgCmd] if the appropriate values are set. See [GpgKeys] for key values. Otherwise,
+ * use [SigningExtension.useInMemoryPgpKeys]. Gets values using [PgpInMemoryKeys]. KeyId is optional.
+ */
+public fun SigningExtension.useGpgOrInMemoryPgp(providers: ProviderFactory) {
+    val gpgKeyName = providers.gradleProperty(GpgKeys.KEY_NAME_PROPERTY)
+    val gpgPassphrase = providers.gradleProperty(GpgKeys.PASSPHRASE_PROPERTY)
+    if (gpgKeyName.isPresent && gpgPassphrase.isPresent)
+        useGpgCmd()
+    else {
+        val keyId = providers.propOrEnv(
+            propertyKey = PgpInMemoryKeys.KEY_ID_PROPERTY,
+            environmentKey = PgpInMemoryKeys.KEY_ID_ENVIRONMENT,
+        )
+        val password = providers.propOrEnv(
+            propertyKey = PgpInMemoryKeys.PASSWORD_PROPERTY,
+            environmentKey = PgpInMemoryKeys.PASSWORD_ENVIRONMENT,
+        )
+        val key = providers.propOrEnv(
+            propertyKey = PgpInMemoryKeys.SECRET_KEY_PROPERTY,
+            environmentKey = PgpInMemoryKeys.SECRET_KEY_ENVIRONMENT,
+        )
+        if (keyId.isPresent)
+            useInMemoryPgpKeys(keyId.get(), key.get(), password.get())
+        else
+            useInMemoryPgpKeys(key.get(), password.get())
+    }
 }

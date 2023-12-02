@@ -1,6 +1,6 @@
 package io.github.john.tuesday.plugins
 
-import io.github.john.tuesday.plugins.publishing.model.withError
+import io.github.john.tuesday.plugins.helper.useGpgOrInMemoryPgp
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
@@ -33,27 +33,7 @@ public class MavenPublishAssistPlugin : Plugin<Project> {
             }
 
             extensions.configure<SigningExtension> {
-                val gpgKeyName = providers.gradleProperty("signing.gnupg.keyName")
-                val gpgPassphrase = providers.gradleProperty("signing.gnupg.passphrase")
-                if (gpgKeyName.isPresent && gpgPassphrase.isPresent)
-                    useGpgCmd()
-                else {
-                    val keyId = providers
-                        .gradleProperty("signing.keyId")
-                        .orElse(providers.environmentVariable("GPG_SIGNING_KEY_ID"))
-                    val password = providers
-                        .gradleProperty("signing.password")
-                        .orElse(providers.environmentVariable("GPG_SIGNING_PASSWORD"))
-                        .withError("Expected to find property 'signing.password' or environment variable 'GPG_SIGNING_PASSWORD' ")
-                    val key = providers
-                        .gradleProperty("GPG_SECRET_KEY")
-                        .orElse(providers.environmentVariable("GPG_SECRET_KEY"))
-                        .withError("Expected to find property 'GPG_SECRET_KEY' or environment variable 'GPG_SECRET_KEY' ")
-                    if (keyId.isPresent)
-                        useInMemoryPgpKeys(keyId.get(), key.getOrError(), password.getOrError())
-                    else
-                        useInMemoryPgpKeys(key.getOrError(), password.getOrError())
-                }
+                useGpgOrInMemoryPgp(providers)
                 sign(publishing.publications)
             }
 
