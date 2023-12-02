@@ -12,6 +12,9 @@ on:
       sonatype:
         default: false
         type: boolean
+      strict-publish:
+        default: false
+        type: boolean
     secrets:
       OSSRH_USERNAME:
         required: true
@@ -56,6 +59,8 @@ jobs:
       - name: Publish to GitHub Packages
         shell: bash
         if: ${{ inputs.github-packages || inputs.sonatype }}
+        continue-on-error: ${{ inputs.strict-publish }}
         env:
+          CONTINUE: ${{ inputs.strict-publish && '--continue' || '' }}
           TASK: ${{ (inputs.github-packages && inputs.sonatype) && 'publish' || (inputs.github-packages && 'publishAllPublicationsToGitHubPackagesRepository' || 'publishAllPublicationsToSonatypeStagingRepository') }}
-        run: ./gradlew :plugin:${{ inputs.project }}:"$TASK"
+        run: ./gradlew :plugin:${{ inputs.project }}:"$TASK" "$CONTINUE"
