@@ -135,18 +135,6 @@ public class DokkaHtmlConventionPlugin : Plugin<Project> {
                     mapOf(DokkaBase::class.qualifiedName!! to DOKKA_BASE_CONFIGURATION_DEFAULT)
                 )
             }
-
-            val dokkaHtmlMultiOrSingleModuleTask = provider { childProjects.isNotEmpty() }.flatMap { isMultiProject ->
-                if (isMultiProject)
-                    rootProject.tasks.named<DokkaMultiModuleTask>("dokkaHtmlMultiModule")
-                else
-                    rootProject.tasks.named<DokkaTask>("dokkaHtml")
-            }
-
-
-            tasks.withType<PublishToMavenRepository>().configureEach {
-                dependsOn(dokkaHtmlMultiOrSingleModuleTask.get())
-            }
         }
     }
 
