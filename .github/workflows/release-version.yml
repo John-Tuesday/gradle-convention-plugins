@@ -6,8 +6,16 @@ on:
       - v[0-9]*
 
 jobs:
+  publish-plugins:
+    permissions:
+      packages: write
+      contents: read
+    uses: ./.github/workflows/publish-maven.yml
+    secrets: inherit
+
   release:
     runs-on: ubuntu-latest
+    needs: publish-plugins
 
     permissions:
       contents: write
@@ -19,10 +27,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release create "$GITHUB_REF_NAME" --generate-notes
-
-  publish-plugins:
-    permissions:
-      packages: write
-      contents: read
-    uses: ./.github/workflows/publish-maven.yml
-    secrets: inherit
