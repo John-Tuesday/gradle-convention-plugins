@@ -157,6 +157,11 @@ public class PluginsConventionPlugin : Plugin<Project> {
                 dependsOn(functionalTest.get())
             }
 
+            val rootCheck = rootProject.tasks.named("check")
+            rootCheck.configure {
+                dependsOn(check)
+            }
+
             val signTask = tasks.withType<Sign>()
             signTask.configureEach {
                 // Must explicitly ensure sign task happens after building, compiling, linking ...

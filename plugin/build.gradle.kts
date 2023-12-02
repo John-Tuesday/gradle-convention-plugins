@@ -1,6 +1,7 @@
 plugins {
     id("convention.plugins") apply false
     id(libs.plugins.dokka.get().pluginId)
+    base
 }
 
 version = pluginLibs.versions.shared.get()
@@ -12,4 +13,6 @@ tasks.dokkaHtmlMultiModule.configure {
 val publishChildren by tasks.registering {
     group = "publishing"
     description = "publish all publications produced by subprojects to all repositories"
+
+    dependsOn(tasks.check)
 }
