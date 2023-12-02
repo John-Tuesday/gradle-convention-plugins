@@ -7,8 +7,14 @@ plugins {
 group = PUBLISH_GROUP
 version = pluginLibs.versions.shared.get()
 
-dependencies {
-    implementation(project(":helper"))
+kotlin {
+    sourceSets {
+        val main by getting {
+            dependencies {
+                api(project(":helper"))
+            }
+        }
+    }
 }
 
 gradlePlugin {
