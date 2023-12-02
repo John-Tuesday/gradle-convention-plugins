@@ -34,8 +34,8 @@ jobs:
       packages: write
 
     env:
-      USERNAME: ${{ github.actor }}
-      TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GPR_USERNAME: ${{ github.actor }}
+      GPR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
       OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
       GPG_SIGNING_PASSWORD: ${{ secrets.GPG_SIGNING_PASSWORD }}
