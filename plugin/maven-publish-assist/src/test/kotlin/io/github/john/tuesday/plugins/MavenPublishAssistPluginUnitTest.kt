@@ -1,5 +1,6 @@
 package io.github.john.tuesday.plugins
 
+import io.github.john.tuesday.plugins.helper.PgpInMemoryKeys
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.plugins.signing.SigningExtension
@@ -10,6 +11,8 @@ import kotlin.test.assertNotNull
 class MavenPublishAssistPluginUnitTest {
     @Test
     fun `maven quick publish plugin`() {
+        System.setProperty(PgpInMemoryKeys.SECRET_KEY_PROPERTY, "")
+        System.setProperty(PgpInMemoryKeys.PASSWORD_PROPERTY, "")
         val project = ProjectBuilder.builder().build()
         project.plugins.apply("io.github.john-tuesday.maven-publish-assist")
 
