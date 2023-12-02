@@ -6,5 +6,5 @@ plugins {
 version = pluginLibs.versions.shared.get()
 
 tasks.dokkaHtmlMultiModule.configure {
-    outputDirectory = rootProject.layout.projectDirectory.dir("../docs/documentation")
+    outputDirectory = rootProject.layout.projectDirectory.dir("../docs/documentation/$version")
 }
