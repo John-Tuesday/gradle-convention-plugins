@@ -24,10 +24,5 @@ jobs:
     permissions:
       packages: write
       contents: read
-    strategy:
-      matrix:
-        project: [ "maven-publish-assist", "dokka-convention", "helper" ]
     uses: ./.github/workflows/publish-maven.yml
-    with:
-      project: ${{ matrix.project }}
     secrets: inherit

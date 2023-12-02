@@ -3,9 +3,6 @@ name: Publish to maven repository
 on:
   workflow_call:
     inputs:
-      project:
-        required: true
-        type: string
       github-packages:
         default: true
         type: boolean
@@ -62,5 +59,5 @@ jobs:
         continue-on-error: ${{ inputs.strict-publish }}
         env:
           CONTINUE: ${{ inputs.strict-publish && '--continue' || '' }}
-          TASK: ${{ (inputs.github-packages && inputs.sonatype) && 'publish' || (inputs.github-packages && 'publishAllPublicationsToGitHubPackagesRepository' || 'publishAllPublicationsToSonatypeStagingRepository') }}
-        run: ./gradlew :plugin:${{ inputs.project }}:"$TASK" "$CONTINUE"
+          TASK: ${{ (inputs.github-packages && inputs.sonatype) && 'publishChildren' || (inputs.github-packages && 'publishChildrenToGitHubPackagesRepository' || 'publishChildrenToSonatypeStagingRepository') }}
+        run: ./gradlew :plugin:"$TASK" "$CONTINUE"
