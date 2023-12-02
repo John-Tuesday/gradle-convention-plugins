@@ -26,7 +26,7 @@ on:
         required: true
 
 jobs:
-  publish-re:
+  publish:
     runs-on: ubuntu-latest
 
     permissions:
