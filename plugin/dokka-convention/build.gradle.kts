@@ -5,7 +5,7 @@ plugins {
 }
 
 group = PUBLISH_GROUP
-version = pluginLibs.versions.dokkaConvention.get()
+version = pluginLibs.versions.shared.get()
 
 kotlin {
     sourceSets {

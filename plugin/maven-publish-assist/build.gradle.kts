@@ -5,7 +5,7 @@ plugins {
 }
 
 group = PUBLISH_GROUP
-version = pluginLibs.versions.mavenPublishAssist.get()
+version = pluginLibs.versions.shared.get()
 
 dependencies {
     implementation(project(":helper"))
