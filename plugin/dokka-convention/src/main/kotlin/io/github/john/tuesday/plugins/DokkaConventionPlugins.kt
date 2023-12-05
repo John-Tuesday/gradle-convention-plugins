@@ -78,7 +78,11 @@ public class DokkaBaseConventionPlugin : Plugin<Project> {
                     }"
                 )
 
-                outputDir.convention(rootProject.layout.projectDirectory.dir(DokkaConventionDefaults.OUTPUT_DIR_RELATIVE_PATH))
+                outputDir.convention(
+                    rootProject.layout.projectDirectory
+                        .dir(DokkaConventionDefaults.OUTPUT_DIR_RELATIVE_PATH)
+                        .dir(provider { version.toString() })
+                )
             }
 
             val moduleDocProvider = provider { layout.projectDirectory.file(DokkaConventionDefaults.MODULE_DOC_FILE_NAME).asFile }
