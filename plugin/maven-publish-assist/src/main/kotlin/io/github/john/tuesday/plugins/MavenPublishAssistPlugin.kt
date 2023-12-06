@@ -37,12 +37,29 @@ public data object FilterTargetKeys {
      * Include targets environment variable name
      */
     public const val INCLUDE_ENVIRONMENT: String = "TARGET_FILTER_INCLUDE"
+
+    /**
+     * Set Ignore case regex option property name
+     *
+     * "true" or "false"
+     * default "true"
+     */
+    public const val IGNORE_CASE_PROPERTY: String = "targetFilter.ignoreCase"
+
+    /**
+     * Set Ignore case regex option environment variable name
+     *
+     * "true" or "false"
+     * default "true"
+     */
+    public const val IGNORE_CASE_ENVIRONMENT: String = "TARGET_FILTER_IGNORE_CASE"
 }
 
 /**
  * Opinionated plugin to assist publishing to Sonatype maven repository
  *
  * [Sign] and [AbstractPublishToMaven] tasks can be skipped/disabled based on regex patterns.
+ *
  * Property [FilterTargetKeys.EXCLUDE_PROPERTY] ("targetFilter.exclude") or environment variable
  * [FilterTargetKeys.EXCLUDE_ENVIRONMENT] ("TARGET_FILTER_EXCLUDE") can specify a regex pattern of which [Sign] and
  * [AbstractPublishToMaven] tasks with a matching target are skipped/disabled
@@ -50,6 +67,10 @@ public data object FilterTargetKeys {
  * Property [FilterTargetKeys.INCLUDE_PROPERTY] ("targetFilter.include") or environment variable
  * [FilterTargetKeys.INCLUDE_ENVIRONMENT] ("TARGET_FILTER_INCLUDE") can specify a regex pattern of which [Sign] and
  * [AbstractPublishToMaven] tasks without a matching target are skipped/disabled
+ *
+ * Property [FilterTargetKeys.IGNORE_CASE_PROPERTY] ("targetFilter.ignoreCase") or environment variable
+ * [FilterTargetKeys.IGNORE_CASE_ENVIRONMENT] ("TARGET_FILTER_IGNORE_CASE") toggles case sensitivity. Can be "true" or
+ * "false" and the default is "true"
  */
 public class MavenPublishAssistPlugin : Plugin<Project> {
     @OptIn(ExperimentalProviderWithErrorMessageApi::class)
@@ -74,14 +95,18 @@ public class MavenPublishAssistPlugin : Plugin<Project> {
                     sign(publishing.publications)
             }
 
+            val ignoreCase = propertyOrEnvironment(
+                propertyKey = FilterTargetKeys.IGNORE_CASE_PROPERTY,
+                environmentKey = FilterTargetKeys.IGNORE_CASE_ENVIRONMENT,
+            ).orElse("true").map { if (it == "false") setOf() else setOf(RegexOption.IGNORE_CASE) }
             val shouldExclude = propertyOrEnvironment(
                 propertyKey = FilterTargetKeys.EXCLUDE_PROPERTY,
                 environmentKey = FilterTargetKeys.EXCLUDE_ENVIRONMENT,
-            ).map { Regex(it) }
+            ).zip(ignoreCase) { pattern, options -> Regex(pattern, options) }
             val shouldInclude = propertyOrEnvironment(
                 propertyKey = FilterTargetKeys.INCLUDE_PROPERTY,
                 environmentKey = FilterTargetKeys.INCLUDE_ENVIRONMENT,
-            ).map { Regex(it) }
+            ).zip(ignoreCase) { pattern, options -> Regex(pattern, options) }
 
             fun shouldRun(targetName: String) = provider {
                 val includeMatched = shouldInclude.map { it.matches(targetName) }.getOrElse(true)
