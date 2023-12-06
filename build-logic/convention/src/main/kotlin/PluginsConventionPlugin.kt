@@ -98,6 +98,12 @@ public class PluginsConventionPlugin : Plugin<Project> {
 
             val testingExtension = extensions.getByType<TestingExtension>()
             val testSuite = testingExtension.suites.named<JvmTestSuite>("test")
+            testSuite.configure {
+                dependencies {
+                    implementation(libs.findLibrary("kotlin-gradlePlugin").get())
+                    implementation(libs.findLibrary("kotlin-multiplatform-gradlePlugin").get())
+                }
+            }
             testingExtension.suites.withType<JvmTestSuite>().configureEach {
                 useKotlinTest()
             }
@@ -120,6 +126,8 @@ public class PluginsConventionPlugin : Plugin<Project> {
 
                 dependencies {
                     implementation(project())
+                    implementation(libs.findLibrary("kotlin-gradlePlugin").get())
+                    implementation(libs.findLibrary("kotlin-multiplatform-gradlePlugin").get())
                 }
 
                 targets.configureEach {
