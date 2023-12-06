@@ -70,8 +70,8 @@ public class MavenPublishAssistPlugin : Plugin<Project> {
             }
 
             extensions.configure<SigningExtension> {
-                useGpgOrInMemoryPgp()
-                sign(publishing.publications)
+                if (useGpgOrInMemoryPgp())
+                    sign(publishing.publications)
             }
 
             val shouldExclude = propertyOrEnvironment(

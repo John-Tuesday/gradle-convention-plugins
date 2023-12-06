@@ -82,28 +82,40 @@ public fun SigningExtension.useGpgOrInMemoryPgp(providers: ProviderFactory) {
     }
 }
 
+/**
+ * Configures signing method: [SigningExtension.useGpgCmd] [SigningExtension.useInMemoryPgpKeys]. Returns if a signing
+ * method is set. If [strict] is `true` then en error is raised in a signing method cannot be set. This means when
+ * [strict] is `true` the function always returns `true`
+ */
 @ExperimentalProviderWithErrorMessageApi
-public fun SigningExtension.useGpgOrInMemoryPgp() {
+public fun SigningExtension.useGpgOrInMemoryPgp(strict: Boolean = false): Boolean {
     val gpgKeyName = project.providers.gradleProperty(GpgKeys.KEY_NAME_PROPERTY)
     val gpgPassphrase = project.providers.gradleProperty(GpgKeys.PASSPHRASE_PROPERTY)
-    if (gpgKeyName.isPresent && gpgPassphrase.isPresent)
+    if (gpgKeyName.isPresent && gpgPassphrase.isPresent) {
         useGpgCmd()
-    else {
-        val keyId = project.propertyOrEnvironment(
-            propertyKey = PgpInMemoryKeys.KEY_ID_PROPERTY,
-            environmentKey = PgpInMemoryKeys.KEY_ID_ENVIRONMENT,
-        )
-        val password = project.propertyOrEnvironment(
-            propertyKey = PgpInMemoryKeys.PASSWORD_PROPERTY,
-            environmentKey = PgpInMemoryKeys.PASSWORD_ENVIRONMENT,
-        )
-        val key = project.propertyOrEnvironment(
-            propertyKey = PgpInMemoryKeys.SECRET_KEY_PROPERTY,
-            environmentKey = PgpInMemoryKeys.SECRET_KEY_ENVIRONMENT,
-        )
-        if (keyId.isPresent)
-            useInMemoryPgpKeys(keyId.get(), key.get(), password.get())
-        else
-            useInMemoryPgpKeys(key.get(), password.get())
+        return true
     }
+
+    val keyId = project.propertyOrEnvironment(
+        propertyKey = PgpInMemoryKeys.KEY_ID_PROPERTY,
+        environmentKey = PgpInMemoryKeys.KEY_ID_ENVIRONMENT,
+    )
+    val password = project.propertyOrEnvironment(
+        propertyKey = PgpInMemoryKeys.PASSWORD_PROPERTY,
+        environmentKey = PgpInMemoryKeys.PASSWORD_ENVIRONMENT,
+    )
+    val key = project.propertyOrEnvironment(
+        propertyKey = PgpInMemoryKeys.SECRET_KEY_PROPERTY,
+        environmentKey = PgpInMemoryKeys.SECRET_KEY_ENVIRONMENT,
+    )
+
+    if (!key.isPresent && !strict)
+        return false
+
+    if (keyId.isPresent)
+        useInMemoryPgpKeys(keyId.get(), key.get(), password.get())
+    else
+        useInMemoryPgpKeys(key.get(), password.get())
+
+    return true
 }
