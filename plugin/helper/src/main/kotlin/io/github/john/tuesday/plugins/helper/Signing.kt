@@ -81,3 +81,29 @@ public fun SigningExtension.useGpgOrInMemoryPgp(providers: ProviderFactory) {
             useInMemoryPgpKeys(key.get(), password.get())
     }
 }
+
+@ExperimentalProviderWithErrorMessageApi
+public fun SigningExtension.useGpgOrInMemoryPgp() {
+    val gpgKeyName = project.providers.gradleProperty(GpgKeys.KEY_NAME_PROPERTY)
+    val gpgPassphrase = project.providers.gradleProperty(GpgKeys.PASSPHRASE_PROPERTY)
+    if (gpgKeyName.isPresent && gpgPassphrase.isPresent)
+        useGpgCmd()
+    else {
+        val keyId = project.propertyOrEnvironment(
+            propertyKey = PgpInMemoryKeys.KEY_ID_PROPERTY,
+            environmentKey = PgpInMemoryKeys.KEY_ID_ENVIRONMENT,
+        )
+        val password = project.propertyOrEnvironment(
+            propertyKey = PgpInMemoryKeys.PASSWORD_PROPERTY,
+            environmentKey = PgpInMemoryKeys.PASSWORD_ENVIRONMENT,
+        )
+        val key = project.propertyOrEnvironment(
+            propertyKey = PgpInMemoryKeys.SECRET_KEY_PROPERTY,
+            environmentKey = PgpInMemoryKeys.SECRET_KEY_ENVIRONMENT,
+        )
+        if (keyId.isPresent)
+            useInMemoryPgpKeys(keyId.get(), key.get(), password.get())
+        else
+            useInMemoryPgpKeys(key.get(), password.get())
+    }
+}
