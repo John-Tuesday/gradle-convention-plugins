@@ -1,5 +1,7 @@
 package io.github.john.tuesday.plugins
 
+import io.github.john.tuesday.plugins.helper.ExperimentalProviderWithErrorMessageApi
+import io.github.john.tuesday.plugins.helper.propertyOrEnvironment
 import io.github.john.tuesday.plugins.helper.useGpgOrInMemoryPgp
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -16,6 +18,7 @@ import org.gradle.plugins.signing.SigningPlugin
  * Opinionated plugin to assist publishing to Sonatype maven repository
  */
 public class MavenPublishAssistPlugin : Plugin<Project> {
+    @OptIn(ExperimentalProviderWithErrorMessageApi::class)
     override fun apply(target: Project) {
         with(target) {
             pluginManager.apply {
@@ -33,7 +36,7 @@ public class MavenPublishAssistPlugin : Plugin<Project> {
             }
 
             extensions.configure<SigningExtension> {
-                useGpgOrInMemoryPgp(providers)
+                useGpgOrInMemoryPgp()
                 sign(publishing.publications)
             }
 
