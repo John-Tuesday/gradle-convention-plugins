@@ -129,18 +129,19 @@ public fun GitHubPackages(repositoryName: String, builder: MavenRepositoryBuilde
 /**
  * Set all values according to [repository] and [providers]
  */
+@OptIn(ExperimentalProviderWithErrorMessageApi::class)
 public fun MavenArtifactRepository.usePreset(repository: MavenRepository, providers: ProviderFactory) {
     name = repository.defaultName
     url = repository.url
     credentials {
         username = providers
-            .propOrEnv(
+            .propertyOrEnvironment(
                 propertyKey = repository.usernamePropertyKey,
                 environmentKey = repository.usernameEnvironmentKey
             )
             .get()
         password = providers
-            .propOrEnv(
+            .propertyOrEnvironment(
                 propertyKey = repository.passwordPropertyKey,
                 environmentKey = repository.passwordEnvironmentKey,
             )
