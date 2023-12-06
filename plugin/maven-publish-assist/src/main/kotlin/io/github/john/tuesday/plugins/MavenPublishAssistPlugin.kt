@@ -14,15 +14,42 @@ import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.plugins.signing.SigningPlugin
 
+/**
+ * Property and environment variable names for configuring target filtering
+ */
 public data object FilterTargetKeys {
+    /**
+     * Exclude targets property name
+     */
     public const val EXCLUDE_PROPERTY: String = "targetFilter.exclude"
+
+    /**
+     * Exclude targets environment variable name
+     */
     public const val EXCLUDE_ENVIRONMENT: String = "TARGET_FILTER_EXCLUDE"
+
+    /**
+     * Include targets property name
+     */
     public const val INCLUDE_PROPERTY: String = "targetFilter.include"
+
+    /**
+     * Include targets environment variable name
+     */
     public const val INCLUDE_ENVIRONMENT: String = "TARGET_FILTER_INCLUDE"
 }
 
 /**
  * Opinionated plugin to assist publishing to Sonatype maven repository
+ *
+ * [Sign] and [AbstractPublishToMaven] tasks can be skipped/disabled based on regex patterns.
+ * Property [FilterTargetKeys.EXCLUDE_PROPERTY] ("targetFilter.exclude") or environment variable
+ * [FilterTargetKeys.EXCLUDE_ENVIRONMENT] ("TARGET_FILTER_EXCLUDE") can specify a regex pattern of which [Sign] and
+ * [AbstractPublishToMaven] tasks with a matching target are skipped/disabled
+ *
+ * Property [FilterTargetKeys.INCLUDE_PROPERTY] ("targetFilter.include") or environment variable
+ * [FilterTargetKeys.INCLUDE_ENVIRONMENT] ("TARGET_FILTER_INCLUDE") can specify a regex pattern of which [Sign] and
+ * [AbstractPublishToMaven] tasks without a matching target are skipped/disabled
  */
 public class MavenPublishAssistPlugin : Plugin<Project> {
     @OptIn(ExperimentalProviderWithErrorMessageApi::class)
