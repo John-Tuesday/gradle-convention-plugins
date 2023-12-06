@@ -14,6 +14,13 @@ import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.plugins.signing.SigningPlugin
 
+public data object FilterTargetKeys {
+    public const val EXCLUDE_PROPERTY: String = "targetFilter.exclude"
+    public const val EXCLUDE_ENVIRONMENT: String = "TARGET_FILTER_EXCLUDE"
+    public const val INCLUDE_PROPERTY: String = "targetFilter.include"
+    public const val INCLUDE_ENVIRONMENT: String = "TARGET_FILTER_INCLUDE"
+}
+
 /**
  * Opinionated plugin to assist publishing to Sonatype maven repository
  */
@@ -40,18 +47,43 @@ public class MavenPublishAssistPlugin : Plugin<Project> {
                 sign(publishing.publications)
             }
 
+            val shouldExclude = propertyOrEnvironment(
+                propertyKey = FilterTargetKeys.EXCLUDE_PROPERTY,
+                environmentKey = FilterTargetKeys.EXCLUDE_ENVIRONMENT,
+            ).map { Regex(it) }
+            val shouldInclude = propertyOrEnvironment(
+                propertyKey = FilterTargetKeys.INCLUDE_PROPERTY,
+                environmentKey = FilterTargetKeys.INCLUDE_ENVIRONMENT,
+            ).map { Regex(it) }
+
+            fun shouldRun(targetName: String) = provider {
+                val includeMatched = shouldInclude.map { it.matches(targetName) }.getOrElse(true)
+                val excludeMatched = shouldExclude.map { it.matches(targetName) }.getOrElse(false)
+                includeMatched && !excludeMatched
+            }
+
             val check by tasks.existing
 
             val signTask = tasks.withType<Sign>()
             signTask.configureEach {
                 // Must explicitly ensure sign task happens after building, compiling, linking ...
                 dependsOn(check)
+
+                val targetName = name.substringAfter("sign").substringBefore("Publication")
+                val shouldRun = shouldRun(targetName)
+                enabled = shouldRun.get()
+                onlyIf { shouldRun.get() }
             }
 
             tasks.withType<AbstractPublishToMaven>().configureEach {
                 dependsOn(check)
                 // Must explicitly ensure publish happens after signing
                 mustRunAfter(signTask)
+
+                val targetName = name.substringAfter("publish").substringBefore("Publication")
+                val shouldRun = shouldRun(targetName)
+                enabled = shouldRun.get()
+                onlyIf { shouldRun.get() }
             }
         }
     }
