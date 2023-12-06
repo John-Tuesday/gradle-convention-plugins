@@ -4,15 +4,44 @@ import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.provider.ProviderFactory
 import java.net.URI
 
+/**
+ * Maven repository for publishing or consuming
+ */
 public sealed interface MavenRepository {
+    /**
+     * Default name used when registering the repository
+     */
     public val defaultName: String
+
+    /**
+     * Property name yielding the username
+     */
     public val usernamePropertyKey: String
+
+    /**
+     * Environment variable name yielding the username
+     */
     public val usernameEnvironmentKey: String
+
+    /**
+     * Property name yielding the password
+     */
     public val passwordPropertyKey: String
+
+    /**
+     * Environment variable name yielding the password
+     */
     public val passwordEnvironmentKey: String
+
+    /**
+     * Url to the repository
+     */
     public val url: URI
 }
 
+/**
+ * Construct a [MavenRepository]
+ */
 public fun MavenRepository(
     defaultName: String,
     usernamePropertyKey: String,
@@ -29,6 +58,9 @@ public fun MavenRepository(
     url = url,
 )
 
+/**
+ * Builder interface for building [MavenRepository]
+ */
 public sealed interface MavenRepositoryBuilder : MavenRepository {
     override var defaultName: String
     override var usernamePropertyKey: String
@@ -56,6 +88,9 @@ internal class MavenRepositoryBuilderImplementation(
     override var url: URI = URI(""),
 ) : MavenRepositoryBuilder
 
+/**
+ * Sonatype Staging [MavenRepository]
+ */
 public val SonatypeStaging: MavenRepository = MavenRepository(
     defaultName = "SonatypeStaging",
     usernamePropertyKey = "ossrhUsername",
@@ -65,6 +100,9 @@ public val SonatypeStaging: MavenRepository = MavenRepository(
     url = URI("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"),
 )
 
+/**
+ * John-Tuesday GitHub Packages maven repository (all)
+ */
 public val GitHubPackages: MavenRepository = MavenRepository(
     defaultName = "GitHubPackages",
     url = URI("https://maven.pkg.github.com/john-tuesday/*"),
@@ -74,6 +112,9 @@ public val GitHubPackages: MavenRepository = MavenRepository(
     passwordEnvironmentKey = "GPR_TOKEN",
 )
 
+/**
+ * Create a [MavenRepository] using [GitHubPackages] as the base, but adjust the exact repository to [repositoryName]
+ */
 public fun GitHubPackages(repositoryName: String, builder: MavenRepositoryBuilder.() -> Unit = {}): MavenRepository {
     return MavenRepositoryBuilderImplementation(
         defaultName = "GitHubPackages",
@@ -85,6 +126,9 @@ public fun GitHubPackages(repositoryName: String, builder: MavenRepositoryBuilde
     ).apply(builder)
 }
 
+/**
+ * Set all values according to [repository] and [providers]
+ */
 public fun MavenArtifactRepository.usePreset(repository: MavenRepository, providers: ProviderFactory) {
     name = repository.defaultName
     url = repository.url
