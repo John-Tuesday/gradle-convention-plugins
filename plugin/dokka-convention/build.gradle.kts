@@ -13,6 +13,7 @@ kotlin {
             dependencies {
                 implementation(libs.dokka.gradlePlugin)
                 implementation(libs.dokka.base)
+                implementation(libs.dokka.version.plugin)
             }
         }
     }
@@ -37,6 +38,12 @@ gradlePlugin {
             displayName = "Dokka html convention plugin"
             description = "Simplify and streamline generating multi-module html documentation"
             implementationClass = "io.github.john.tuesday.plugins.DokkaHtmlConventionPlugin"
+        }
+        val dokkaVersioningConventionPlugin by registering {
+            id = pluginLibs.plugins.dokka.convention.versioning.get().pluginId
+            displayName = "Dokka Versioning convention plugin"
+            description = "Simplify and streamline configuring versioning"
+            implementationClass = "io.github.john.tuesday.plugins.DokkaVersioningConventionPlugin"
         }
     }
 }

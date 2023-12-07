@@ -6,10 +6,13 @@ import org.gradle.api.Task
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.kotlin.dsl.*
+import org.jetbrains.dokka.DokkaVersion
 import org.jetbrains.dokka.base.DokkaBase
 import org.jetbrains.dokka.gradle.*
+import org.jetbrains.dokka.versioning.VersioningPlugin
 import java.net.URL
 
 /**
@@ -85,7 +88,8 @@ public class DokkaBaseConventionPlugin : Plugin<Project> {
                 )
             }
 
-            val moduleDocProvider = provider { layout.projectDirectory.file(DokkaConventionDefaults.MODULE_DOC_FILE_NAME).asFile }
+            val moduleDocProvider =
+                provider { layout.projectDirectory.file(DokkaConventionDefaults.MODULE_DOC_FILE_NAME).asFile }
 
             fun GradleDokkaSourceSetBuilder.configure() {
                 val moduleDoc = moduleDocProvider.get()
@@ -172,5 +176,60 @@ public class DokkaHtmlConventionPlugin : Plugin<Project> {
                     "separateInheritedMembers": true 
                 }
                 """
+    }
+}
+
+/**
+ * Applies [DokkaHtmlConventionPlugin] and Dokka Versioning plugin. Configures default properties to mirror [DokkaBaseConventionPlugin]
+ */
+public class DokkaVersioningConventionPlugin : Plugin<Project> {
+    override fun apply(target: Project) {
+        with(target) {
+            pluginManager.apply {
+                apply<DokkaHtmlConventionPlugin>()
+            }
+
+            dependencies {
+                add("dokkaPlugin", "org.jetbrains.dokka:versioning-plugin:${DokkaVersion.version}")
+            }
+
+            tasks.withType<AbstractDokkaTask>().configureEach {
+                pluginsMapConfiguration.convention(
+                    versioningMapConfiguration()
+                )
+            }
+        }
+    }
+
+    internal companion object {
+
+        fun Project.versioningMapConfiguration(
+            version: Provider<String> = provider { this.version.toString() },
+            olderVersionsDir: Provider<String> = defaultOlderVersionsDirPath(),
+        ): Provider<Map<String, String>> =
+            provider {
+                mapOf(
+                    VersioningPlugin::class.qualifiedName!! to versioningJson(
+                        version = version.get(), olderVersionsDir = olderVersionsDir.get()
+                    )
+                )
+            }
+
+        fun Project.defaultOlderVersionsDirPath(): Provider<String> = provider {
+            rootProject.layout.projectDirectory
+                .dir(DokkaConventionDefaults.OUTPUT_DIR_RELATIVE_PATH)
+                .asFile
+                .invariantSeparatorsPath
+        }
+
+        fun versioningJson(
+            version: String,
+            olderVersionsDir: String,
+        ): String = """
+                {
+                    "version": "$version",
+                    "olderVersionsDir": "$olderVersionsDir"
+                }
+        """
     }
 }
