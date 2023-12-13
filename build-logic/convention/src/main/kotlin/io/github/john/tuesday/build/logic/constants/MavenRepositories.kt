@@ -25,12 +25,15 @@ public data object SonatypeStaging : MavenRepository(
 
 public data object GitHubPackages : MavenRepository(
     defaultName = "GitHubPackages",
-    url = URI("https://maven.pkg.github.com/john-tuesday/gradle-convention-plugins"),
+    url = URI("https://maven.pkg.github.com/tuesday-org/gradle-plugins"),
     usernamePropertyKey = "gpr.user",
     usernameEnvironmentKey = "GPR_USERNAME",
     passwordPropertyKey = "gpr.key",
     passwordEnvironmentKey = "GPR_TOKEN",
-)
+) {
+    public const val WEBSITE: String = "https://github.com/tuesday-org/gradle-plugins"
+    public const val VCS_URL: String = "https://github.com/tuesday-org/gradle-plugins"
+}
 
 public fun MavenArtifactRepository.usePreset(repository: MavenRepository, providers: ProviderFactory) {
     name = repository.defaultName

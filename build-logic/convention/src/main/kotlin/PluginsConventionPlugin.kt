@@ -139,8 +139,8 @@ public class PluginsConventionPlugin : Plugin<Project> {
 
             val gradlePluginExtension = extensions.getByType<GradlePluginDevelopmentExtension>()
             gradlePluginExtension.apply {
-                website = "https://github.com/John-Tuesday/gradle-convention-plugins"
-                vcsUrl = "https://github.com/John-Tuesday/gradle-convention-plugins"
+                website = GitHubPackages.WEBSITE
+                vcsUrl = GitHubPackages.VCS_URL
             }
             gradlePluginExtension.testSourceSets.add(functionalTest.map { it.sources }.get())
             val publish by tasks.getting
