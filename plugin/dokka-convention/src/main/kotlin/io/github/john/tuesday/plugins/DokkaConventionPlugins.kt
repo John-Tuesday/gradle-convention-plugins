@@ -127,7 +127,7 @@ public class DokkaBaseConventionPlugin : Plugin<Project> {
             get() = sourceBaseUrl.map { "$it/${DokkaConventionDefaults.SOURCE_DIR_NAME}" }
 
         fun Project.defaultSourceBaseUrl(): Provider<String> = provider {
-            "https://github.com/John-Tuesday/${rootProject.name}/tree/main${
+            "https://github.com/John-Tuesday/${rootProject.name}/tree/v${project.version}${
                 project.path.replace(':', '/')
             }"
         }
