@@ -100,9 +100,30 @@ public val SonatypeStaging: MavenRepository = MavenRepository(
     url = URI("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"),
 )
 
+internal fun GitHubPackagesUrl(owner: String, repository: String): String = "https://maven.pkg.github.com/${owner.lowercase()}/$repository"
+
+/**
+ * Create a [MavenRepository] pointing to the [GitHubPackages] described by [owner] and [repository]
+ */
+public fun GitHubPackages(owner: String, repository: String = "*", builder: MavenRepositoryBuilder.() -> Unit = {}): MavenRepository {
+    return MavenRepositoryBuilderImplementation(
+        defaultName = "GitHubPackages",
+        url = URI(GitHubPackagesUrl(owner = owner, repository = repository)),
+        usernamePropertyKey = "gpr.user",
+        usernameEnvironmentKey = "GPR_USERNAME",
+        passwordPropertyKey = "gpr.key",
+        passwordEnvironmentKey = "GPR_TOKEN",
+    ).apply(builder)
+}
+
 /**
  * John-Tuesday GitHub Packages maven repository (all)
  */
+@Deprecated(
+    message = "This will be removed in the next version.",
+    replaceWith = ReplaceWith("GitHubPackages"),
+    level = DeprecationLevel.WARNING,
+)
 public val GitHubPackages: MavenRepository = MavenRepository(
     defaultName = "GitHubPackages",
     url = URI("https://maven.pkg.github.com/john-tuesday/*"),
