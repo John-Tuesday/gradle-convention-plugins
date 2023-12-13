@@ -18,6 +18,7 @@ kotlin {
 }
 
 gradlePlugin {
+    @Suppress("UnstableApiUsage")
     plugins {
         val mavenPublishAssist by registering {
             id = pluginLibs.plugins.maven.publish.assist.get().pluginId
