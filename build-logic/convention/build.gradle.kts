@@ -31,6 +31,7 @@ kotlin {
             dependencies {
                 implementation("org.gradle.kotlin:gradle-kotlin-dsl-plugins:$expectedKotlinDslPluginsVersion")
                 implementation(libs.dokka.gradlePlugin)
+                implementation(libs.dokka.version.plugin)
                 compileOnly(libs.kotlin.gradlePlugin)
                 compileOnly(libs.kotlin.multiplatform.gradlePlugin)
             }
