@@ -3,6 +3,7 @@ package io.github.john.tuesday.plugins
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.provider.Property
@@ -13,6 +14,7 @@ import org.jetbrains.dokka.DokkaVersion
 import org.jetbrains.dokka.base.DokkaBase
 import org.jetbrains.dokka.gradle.*
 import org.jetbrains.dokka.versioning.VersioningPlugin
+import java.io.File
 import java.net.URL
 
 /**
@@ -54,6 +56,8 @@ internal data object DokkaConventionDefaults {
      * Path to source files relative to a project directory
      */
     const val SOURCE_DIR_NAME: String = "src"
+
+    const val REMOTE_LINE_SUFFIX: String = "#L"
 }
 
 /**
@@ -74,19 +78,12 @@ public class DokkaBaseConventionPlugin : Plugin<Project> {
                 apply<DokkaPlugin>()
             }
 
-            val repositoryDocumentation = extensions.create<RepositoryDocumentation>("repositoryDocumentation").apply {
-                sourceBaseUrl.convention(
-                    "https://github.com/John-Tuesday/${rootProject.name}/tree/main${
-                        project.path.replace(':', '/')
-                    }"
-                )
+            val repositoryDocumentation =
+                extensions.create<RepositoryDocumentation>(REPOSITORY_DOCUMENTATION_NAME).apply {
+                    sourceBaseUrl.convention(defaultSourceBaseUrl())
 
-                outputDir.convention(
-                    rootProject.layout.projectDirectory
-                        .dir(DokkaConventionDefaults.OUTPUT_DIR_RELATIVE_PATH)
-                        .dir(provider { version.toString() })
-                )
-            }
+                    outputDir.convention(defaultOutputDir())
+                }
 
             val moduleDocProvider =
                 provider { layout.projectDirectory.file(DokkaConventionDefaults.MODULE_DOC_FILE_NAME).asFile }
@@ -96,9 +93,9 @@ public class DokkaBaseConventionPlugin : Plugin<Project> {
                 if (moduleDoc.exists() && moduleDoc.isFile) includes.from(moduleDoc)
 
                 sourceLink {
-                    localDirectory.convention(layout.projectDirectory.dir(DokkaConventionDefaults.SOURCE_DIR_NAME).asFile)
-                    remoteUrl.convention(repositoryDocumentation.sourceBaseUrl.map { URL("$it/${DokkaConventionDefaults.SOURCE_DIR_NAME}") })
-                    remoteLineSuffix.convention("#L")
+                    localDirectory.convention(defaultSourceLinkLocalDirectory())
+                    remoteUrl.convention(repositoryDocumentation.remoteUrl.map { URL(it) })
+                    remoteLineSuffix.convention(DokkaConventionDefaults.REMOTE_LINE_SUFFIX)
                 }
             }
 
@@ -120,6 +117,28 @@ public class DokkaBaseConventionPlugin : Plugin<Project> {
 
                 dokkaSourceSets.configureEach { configure() }
             }
+        }
+    }
+
+    internal companion object {
+        const val REPOSITORY_DOCUMENTATION_NAME: String = "repositoryDocumentation"
+
+        val RepositoryDocumentation.remoteUrl: Provider<String>
+            get() = sourceBaseUrl.map { "$it/${DokkaConventionDefaults.SOURCE_DIR_NAME}" }
+
+        fun Project.defaultSourceBaseUrl(): Provider<String> = provider {
+            "https://github.com/John-Tuesday/${rootProject.name}/tree/main${
+                project.path.replace(':', '/')
+            }"
+        }
+
+        fun Project.defaultOutputDir(): Provider<Directory> =
+            rootProject.layout.projectDirectory
+                .dir(DokkaConventionDefaults.OUTPUT_DIR_RELATIVE_PATH)
+                .dir(provider { version.toString() })
+
+        fun Project.defaultSourceLinkLocalDirectory(): Provider<File?> = provider {
+            layout.projectDirectory.dir(DokkaConventionDefaults.SOURCE_DIR_NAME).asFile
         }
     }
 }
