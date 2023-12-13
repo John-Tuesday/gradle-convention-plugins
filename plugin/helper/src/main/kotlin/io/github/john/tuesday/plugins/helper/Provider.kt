@@ -4,7 +4,11 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import javax.inject.Inject
 
+/**
+ * Annotation marking use of [ProviderWithErrorMessage]
+ */
 @RequiresOptIn
+@MustBeDocumented
 public annotation class ExperimentalProviderWithErrorMessageApi
 
 @Deprecated(
@@ -47,12 +51,18 @@ public class ProviderWithError<T> internal constructor(
     public fun getOrError(): T = if (provider.isPresent) provider.get() else error(errorMessage)
 }
 
+/**
+ * Essentially just a [Provider] which will show a more helpful message when [get] is called with no value set.
+ */
 @ExperimentalProviderWithErrorMessageApi
 public sealed class ProviderWithErrorMessage<T>(
     private val value: Provider<T>,
 ) : Provider<T> by value {
     protected abstract val message: Provider<String>
 
+    /**
+     * When the value [isPresent], it returns the value; otherwise, it raises an error with the preset message.
+     */
     override fun get(): T & Any {
         if (isPresent)
             return value.get()
@@ -60,6 +70,11 @@ public sealed class ProviderWithErrorMessage<T>(
             error(message.get())
     }
 
+    /**
+     * When the value [isPresent], it returns the value; otherwise, it raises an error with the preset message.
+     *
+     * This behaves identically to [get] but is more explicit
+     */
     public fun getOrError(): T = if (value.isPresent) value.get() else error(message.get())
 
     internal companion object {
@@ -87,22 +102,34 @@ internal class ProviderWithErrorMessageInjectImplementation<T>(
     override val message: Provider<String> = providers.provider { messageString }
 }
 
+/**
+ * Create a [ProviderWithErrorMessage] whose error message will be [message]
+ */
 @ExperimentalProviderWithErrorMessageApi
 public fun <T> ProviderWithErrorMessage(
     value: Provider<T>,
     message: Provider<String>,
 ): ProviderWithErrorMessage<T> = ProviderWithErrorMessageImplementation(value, message)
 
+/**
+ * Create a [ProviderWithErrorMessage] whose error message will be [message]
+ */
 @ExperimentalProviderWithErrorMessageApi
 public fun <T> ProviderWithErrorMessage(
     value: Provider<T>,
     message: String,
 ): ProviderWithErrorMessage<T> = ProviderWithErrorMessageInjectImplementation(value, message)
 
+/**
+ * Convert `this` to a [ProviderWithErrorMessage] whose error message is [message]
+ */
 @ExperimentalProviderWithErrorMessageApi
 public fun <T> Provider<T>.withErrorMessage(message: Provider<String>): ProviderWithErrorMessage<T> =
     ProviderWithErrorMessage(value = this, message = message)
 
+/**
+ * Convert `this` to a [ProviderWithErrorMessage] whose error message is [message]
+ */
 @ExperimentalProviderWithErrorMessageApi
 public fun <T> Provider<T>.withErrorMessage(message: String): ProviderWithErrorMessage<T> =
     ProviderWithErrorMessage(value = this, message = message)
