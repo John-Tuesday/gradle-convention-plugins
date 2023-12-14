@@ -61,15 +61,15 @@ internal data object DokkaConventionDefaults {
 }
 
 /**
- * Applies [DokkaPlugin] and includes "Module.md" per [DokkaTaskPartial] and per [DokkaMultiModuleTask].
+ * Applies [DokkaPlugin] and includes "Module.md" per [AbstractDokkaLeafTask], per [DokkaMultiModuleTask], and per [DokkaTask].
  * SourceLink base directory is `./src` so [RepositoryDocumentation.sourceBaseUrl] should be `.` because `/src`
  * is automatically added.
  *
  * Source base url default is
  *
- *     "https://github.com/John-Tuesday/${rootProject.name}/tree/main${project.path.replace(':', '/')}"
+ *     "https://github.com/John-Tuesday/${rootProject.name}/tree/v${project.version}${project.path.replace(':', '/')}"
  *
- * Output directory is set to `"docs/documentation"`, relative to the root project.
+ * Output directory is set to `"docs/documentation/${project.version}"`, relative to the root project.
  */
 public class DokkaBaseConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
