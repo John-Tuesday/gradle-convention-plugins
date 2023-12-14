@@ -1,0 +1,10 @@
+$dokka.format:html-v1
+$dokka.linkExtension:html
+
+module:dokka-convention
+io.github.john.tuesday.plugins
+module:helper
+io.github.john.tuesday.plugins
+io.github.john.tuesday.plugins.helper
+module:maven-publish-assist
+io.github.john.tuesday.plugins
