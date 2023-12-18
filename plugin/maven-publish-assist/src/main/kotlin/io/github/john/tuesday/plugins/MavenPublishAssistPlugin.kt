@@ -3,6 +3,7 @@ package io.github.john.tuesday.plugins
 import io.github.john.tuesday.plugins.helper.ExperimentalProviderWithErrorMessageApi
 import io.github.john.tuesday.plugins.helper.propertyOrEnvironment
 import io.github.john.tuesday.plugins.helper.useGpgOrInMemoryPgp
+import io.github.john.tuesday.plugins.maven.publish.assist.model.FilterTargetExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
@@ -94,6 +95,9 @@ public class MavenPublishAssistPlugin : Plugin<Project> {
                 if (useGpgOrInMemoryPgp())
                     sign(publishing.publications)
             }
+
+            val filterTargetExtension = extensions.create<FilterTargetExtension>(FilterTargetExtension.Default.NAME)
+            filterTargetExtension.init(target)
 
             val ignoreCase = propertyOrEnvironment(
                 propertyKey = FilterTargetKeys.IGNORE_CASE_PROPERTY,
