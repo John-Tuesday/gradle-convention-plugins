@@ -9,6 +9,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
+internal const val MAVEN_ASSIST_ID = "io.github.john-tuesday.maven-publish-assist"
+
 class MavenPublishAssistPluginFunctionalTest {
 
     @field:TempDir
@@ -20,9 +22,12 @@ class MavenPublishAssistPluginFunctionalTest {
     private val kotlinMultiplatformBuildFileString =
         """
             plugins {
-                kotlin("multiplatform") version "1.9.21"
-                id("io.github.john-tuesday.maven-publish-assist")
+                kotlin("multiplatform") version "${KotlinVersion.CURRENT}"
+                id("$MAVEN_ASSIST_ID")
             }
+            
+            group = "test.group"
+            version = "0.1.0"
             
             kotlin {
                 jvm()
@@ -54,7 +59,7 @@ class MavenPublishAssistPluginFunctionalTest {
         buildFile.writeText(
             """
             plugins {
-                id("io.github.john-tuesday.maven-publish-assist")
+                id("$MAVEN_ASSIST_ID")
             }
         """.trimIndent()
         )
