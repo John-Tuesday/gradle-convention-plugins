@@ -135,6 +135,10 @@ public class PluginsConventionPlugin : Plugin<Project> {
                         shouldRunAfter(testSuite.get())
                     }
                 }
+
+                kotlinExtension.target.compilations.named(name).configure {
+                    associateWith(mainCompilation.get())
+                }
             }
 
             val gradlePluginExtension = extensions.getByType<GradlePluginDevelopmentExtension>()
