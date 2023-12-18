@@ -1,11 +1,13 @@
 package io.github.john.tuesday.plugins
 
+import io.github.john.tuesday.plugins.MavenPublishAssistPlugin.TestFlags.useFilterTargetExt
 import io.github.john.tuesday.plugins.helper.ExperimentalProviderWithErrorMessageApi
 import io.github.john.tuesday.plugins.helper.propertyOrEnvironment
 import io.github.john.tuesday.plugins.helper.useGpgOrInMemoryPgp
 import io.github.john.tuesday.plugins.maven.publish.assist.model.FilterTargetExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.provider.Provider
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
@@ -99,6 +101,12 @@ public class MavenPublishAssistPlugin : Plugin<Project> {
             val filterTargetExtension = extensions.create<FilterTargetExtension>(FilterTargetExtension.Default.NAME)
             filterTargetExtension.init(target)
 
+            val useFilterTarget = useFilterTargetExt
+            setSignTaskRelations()
+            setPublishTaskRelations()
+            if (useFilterTarget.get())
+                filterTargets(filterTargetExtension)
+
             val ignoreCase = propertyOrEnvironment(
                 propertyKey = FilterTargetKeys.IGNORE_CASE_PROPERTY,
                 environmentKey = FilterTargetKeys.IGNORE_CASE_ENVIRONMENT,
@@ -118,29 +126,117 @@ public class MavenPublishAssistPlugin : Plugin<Project> {
                 includeMatched && !excludeMatched
             }
 
-            val check by tasks.existing
+            if (!useFilterTarget.get()) {
+                val check by tasks.existing
 
-            val signTask = tasks.withType<Sign>()
-            signTask.configureEach {
-                // Must explicitly ensure sign task happens after building, compiling, linking ...
-                dependsOn(check)
-
-                val targetName = name.substringAfter("sign").substringBefore("Publication")
-                val shouldRun = shouldRun(targetName)
-                enabled = shouldRun.get()
-                onlyIf { shouldRun.get() }
-            }
-
-            tasks.withType<AbstractPublishToMaven>().configureEach {
-                dependsOn(check)
-                // Must explicitly ensure publish happens after signing
-                mustRunAfter(signTask)
-
-                val targetName = name.substringAfter("publish").substringBefore("Publication")
-                val shouldRun = shouldRun(targetName)
-                enabled = shouldRun.get()
-                onlyIf { shouldRun.get() }
+                val signTask = tasks.withType<Sign>()
+                signTask.configureEach {
+                    val targetName = name.substringAfter("sign").substringBefore("Publication")
+                    val shouldRun = shouldRun(targetName)
+                    enabled = shouldRun.get()
+                    onlyIf { shouldRun.get() }
+                }
+                tasks.withType<AbstractPublishToMaven>().configureEach {
+                    val targetName = name.substringAfter("publish").substringBefore("Publication")
+                    val shouldRun = shouldRun(targetName)
+                    enabled = shouldRun.get()
+                    onlyIf { shouldRun.get() }
+                }
             }
         }
     }
+
+    internal data object TestFlags {
+        const val USE_FILTER_TARGET_EXT: String = "useFilterTargetExt"
+
+        val Project.useFilterTargetExt: Provider<Boolean>
+            get() = provider {
+                if (hasProperty(USE_FILTER_TARGET_EXT))
+                    property(USE_FILTER_TARGET_EXT).toString() == "true"
+                else
+                    false
+            }
+
+        const val PUBLISH_RELATES_CHECK: String = "publishRelatesCheck"
+
+        enum class RelationType {
+            DependsOn,
+            MustRunAfter,
+            None,
+        }
+
+        val Project.publishRelatesToCheck: Provider<RelationType>
+            get() = provider {
+                if (hasProperty(PUBLISH_RELATES_CHECK)) {
+                    val value = property(PUBLISH_RELATES_CHECK).toString()
+                    RelationType.entries.firstOrNull { it.name.lowercase() == value.lowercase() }
+                        ?: RelationType.DependsOn
+                } else
+                    RelationType.DependsOn
+            }
+
+        const val SIGN_RELATES_CHECK: String = "signRelatesCheck"
+        val Project.signRelatesToCheck: Provider<RelationType>
+            get() = provider {
+                if (hasProperty(SIGN_RELATES_CHECK)) {
+                    val value = property(PUBLISH_RELATES_CHECK).toString()
+                    RelationType.entries.firstOrNull { it.name.lowercase() == value.lowercase() }
+                        ?: RelationType.DependsOn
+                } else
+                    RelationType.DependsOn
+            }
+    }
+}
+
+internal fun Project.setSignTaskRelations() {
+    val check by tasks.existing
+    tasks.withType<Sign>().configureEach {
+        with(MavenPublishAssistPlugin.TestFlags) {
+            // Must explicitly ensure sign task happens after building, compiling, linking ...
+            when (signRelatesToCheck.get()) {
+                MavenPublishAssistPlugin.TestFlags.RelationType.DependsOn -> dependsOn(check)
+                MavenPublishAssistPlugin.TestFlags.RelationType.MustRunAfter -> mustRunAfter(check)
+                MavenPublishAssistPlugin.TestFlags.RelationType.None -> Unit
+            }
+        }
+    }
+}
+
+internal fun Project.setPublishTaskRelations() {
+    val check by tasks.existing
+    val signTasks = tasks.withType<Sign>()
+    tasks.withType<AbstractPublishToMaven>().configureEach {
+        with(MavenPublishAssistPlugin.TestFlags) {
+            when (publishRelatesToCheck.get()) {
+                MavenPublishAssistPlugin.TestFlags.RelationType.DependsOn -> dependsOn(check)
+                MavenPublishAssistPlugin.TestFlags.RelationType.MustRunAfter -> mustRunAfter(check)
+                MavenPublishAssistPlugin.TestFlags.RelationType.None -> Unit
+            }
+        }
+        // Must explicitly ensure publish happens after signing
+        mustRunAfter(signTasks)
+    }
+}
+
+internal fun Project.filterTargets(filterTargetExtension: FilterTargetExtension) {
+    tasks.withType<Sign>().configureEach {
+        filterTargets(filterTargetExtension)
+    }
+    tasks.withType<AbstractPublishToMaven>().configureEach {
+        filterTargets(filterTargetExtension)
+    }
+}
+
+internal fun Sign.filterTargets(filterTargetExtension: FilterTargetExtension) {
+    val targetName = name.substringAfter("sign").substringBefore("Publication")
+    val shouldRun = filterTargetExtension.shouldRun(targetName)
+    enabled = shouldRun.get()
+    onlyIf { shouldRun.get() }
+}
+
+internal fun AbstractPublishToMaven.filterTargets(filterTargetExtension: FilterTargetExtension) {
+    val targetName = name.substringAfter("publish").substringBefore("Publication")
+    val shouldRun = filterTargetExtension.shouldRun(targetName)
+    enabled = shouldRun.get()
+    onlyIf { shouldRun.get() }
 }
