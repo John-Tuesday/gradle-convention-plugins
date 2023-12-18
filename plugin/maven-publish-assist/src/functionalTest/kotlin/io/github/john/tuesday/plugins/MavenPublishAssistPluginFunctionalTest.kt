@@ -54,7 +54,7 @@ class MavenPublishAssistPluginFunctionalTest {
     }
 
     @Test
-    fun `maven quick`() {
+    fun `basic single project check`() {
         settingsFile.writeText("")
         buildFile.writeText(
             """
