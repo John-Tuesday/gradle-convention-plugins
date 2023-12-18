@@ -1,6 +1,5 @@
 package io.github.john.tuesday.plugins
 
-import io.github.john.tuesday.plugins.helper.PgpInMemoryKeys
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.kotlin.dsl.*
@@ -16,8 +15,7 @@ import kotlin.test.assertTrue
 
 class MavenPublishAssistPluginUnitTest {
     private val defaultProperties = mapOf (
-        PgpInMemoryKeys.SECRET_KEY_PROPERTY to "",
-        PgpInMemoryKeys.PASSWORD_PROPERTY to "",
+        MavenPublishAssistPlugin.TestFlags.USE_FILTER_TARGET_EXT to "true"
  )
 
     private fun defaultProject(): Project {

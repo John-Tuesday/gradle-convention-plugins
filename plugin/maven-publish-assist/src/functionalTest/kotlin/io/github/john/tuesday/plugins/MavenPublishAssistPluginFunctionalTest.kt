@@ -1,6 +1,5 @@
 package io.github.john.tuesday.plugins
 
-import io.github.john.tuesday.plugins.helper.PgpInMemoryKeys
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.io.TempDir
@@ -64,12 +63,6 @@ class MavenPublishAssistPluginFunctionalTest {
             .forwardOutput()
             .withPluginClasspath()
             .withProjectDir(projectDir)
-            .withEnvironment(
-                mapOf(
-                    PgpInMemoryKeys.SECRET_KEY_ENVIRONMENT to "",
-                    PgpInMemoryKeys.PASSWORD_ENVIRONMENT to "",
-                )
-            )
             .withArguments(":check")
         val result = runner.build()
     }
@@ -79,8 +72,6 @@ class MavenPublishAssistPluginFunctionalTest {
         val runner = kmmRunner()
             .withEnvironment(
                 mapOf(
-                    PgpInMemoryKeys.SECRET_KEY_ENVIRONMENT to "",
-                    PgpInMemoryKeys.PASSWORD_ENVIRONMENT to "",
                     FilterTargetKeys.EXCLUDE_ENVIRONMENT to "(Jvm)|(LinuxX64)",
                 )
             )
@@ -88,23 +79,22 @@ class MavenPublishAssistPluginFunctionalTest {
         val result = runner.build()
 
         val signJvmTask = result.task(":signJvmPublication")
-        assertNotNull(signJvmTask)
-        assertEquals(TaskOutcome.SKIPPED, signJvmTask.outcome)
+        assertNull(signJvmTask)
 
         val publishJvmTask = result.task(":publishJvmPublicationToMavenLocal")
         assertNotNull(publishJvmTask)
         assertEquals(TaskOutcome.SKIPPED, publishJvmTask.outcome)
 
         val result2 = runner
-            .withArguments(":publishKotlinMultiplatformPublicationToMavenLocal", "--continue", "--exclude-task", ":signKotlinMultiplatformPublication")
-            .buildAndFail()
+            .withArguments(":publishKotlinMultiplatformPublicationToMavenLocal")
+            .build()
 
         val signKmpTask = result2.task(":signKotlinMultiplatformPublication")
         assertNull(signKmpTask)
 
         val publishKmpTask = result2.task(":publishKotlinMultiplatformPublicationToMavenLocal")
         assertNotNull(publishKmpTask)
-        assertEquals(TaskOutcome.FAILED, publishKmpTask.outcome)
+        assertEquals(TaskOutcome.SUCCESS, publishKmpTask.outcome)
     }
 
     @Test
@@ -112,28 +102,25 @@ class MavenPublishAssistPluginFunctionalTest {
         val runner = kmmRunner()
             .withEnvironment(
                 mapOf(
-                    PgpInMemoryKeys.SECRET_KEY_ENVIRONMENT to "",
-                    PgpInMemoryKeys.PASSWORD_ENVIRONMENT to "",
                     FilterTargetKeys.INCLUDE_ENVIRONMENT to "(Jvm)|(LinuxX64)",
                 )
             )
-            .withArguments(":publishJvmPublicationToMavenLocal", "--continue", "--exclude-task", ":signJvmPublication")
-        val result = runner.buildAndFail()
+            .withArguments(":publishJvmPublicationToMavenLocal")
+        val result = runner.build()
 
         val signJvmTask = result.task(":signJvmPublication")
         assertNull(signJvmTask)
 
         val publishJvmTask = result.task(":publishJvmPublicationToMavenLocal")
         assertNotNull(publishJvmTask)
-        assertEquals(TaskOutcome.FAILED, publishJvmTask.outcome)
+        assertEquals(TaskOutcome.SUCCESS, publishJvmTask.outcome)
 
         val result2 = runner
             .withArguments(":publishKotlinMultiplatformPublicationToMavenLocal")
             .build()
 
         val signKmpTask = result2.task(":signKotlinMultiplatformPublication")
-        assertNotNull(signKmpTask)
-        assertEquals(TaskOutcome.SKIPPED, signKmpTask.outcome)
+        assertNull(signKmpTask)
 
         val publishKmpTask = result2.task(":publishKotlinMultiplatformPublicationToMavenLocal")
         assertNotNull(publishKmpTask)
