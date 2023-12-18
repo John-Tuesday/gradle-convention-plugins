@@ -104,8 +104,10 @@ public class MavenPublishAssistPlugin : Plugin<Project> {
             val useFilterTarget = useFilterTargetExt
             setSignTaskRelations()
             setPublishTaskRelations()
-            if (useFilterTarget.get())
+            if (useFilterTarget.get()) {
+                logger.info("Using ${FilterTargetExtension::class.simpleName}")
                 filterTargets(filterTargetExtension)
+            }
 
             val ignoreCase = propertyOrEnvironment(
                 propertyKey = FilterTargetKeys.IGNORE_CASE_PROPERTY,
@@ -127,6 +129,7 @@ public class MavenPublishAssistPlugin : Plugin<Project> {
             }
 
             if (!useFilterTarget.get()) {
+                logger.info("Using old target filter")
                 val check by tasks.existing
 
                 val signTask = tasks.withType<Sign>()
