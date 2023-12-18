@@ -61,7 +61,8 @@ public abstract class FilterTargetExtension {
             propertyKey = Properties.IgnoreCase.PROPERTY,
             environmentKey = Properties.IgnoreCase.ENVIRONMENT,
         )
-            .map { Properties.IgnoreCase.IgnoreCaseValues.valueOfOrNull(it) ?: Properties.IgnoreCase.DEFAULT }
+            .map { Properties.IgnoreCase.IgnoreCaseValues.fromValue(it) }
+            .orElse(Properties.IgnoreCase.DEFAULT)
             .map {
                 when (it) {
                     Properties.IgnoreCase.IgnoreCaseValues.False -> setOf()
@@ -114,9 +115,11 @@ public abstract class FilterTargetExtension {
                     get() = name.lowercase()
 
                 public companion object {
-                    public fun valueOfOrNull(name: String): IgnoreCaseValues? = entries.firstOrNull {
+                    public fun fromValueOrNull(name: String): IgnoreCaseValues? = entries.firstOrNull {
                         it.value == name.lowercase()
                     }
+
+                    public fun fromValue(name: String): IgnoreCaseValues = fromValueOrNull(name) ?: throw(IllegalArgumentException(name))
                 }
             }
         }
