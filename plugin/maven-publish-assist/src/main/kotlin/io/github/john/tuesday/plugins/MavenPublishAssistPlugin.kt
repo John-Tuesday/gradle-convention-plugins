@@ -182,7 +182,7 @@ public class MavenPublishAssistPlugin : Plugin<Project> {
         val Project.signRelatesToCheck: Provider<RelationType>
             get() = provider {
                 if (hasProperty(SIGN_RELATES_CHECK)) {
-                    val value = property(PUBLISH_RELATES_CHECK).toString()
+                    val value = property(SIGN_RELATES_CHECK).toString()
                     RelationType.entries.firstOrNull { it.name.lowercase() == value.lowercase() }
                         ?: RelationType.DependsOn
                 } else
