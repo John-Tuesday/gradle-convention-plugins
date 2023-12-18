@@ -4,8 +4,12 @@ import io.github.john.tuesday.plugins.MavenPublishAssistPlugin
 import io.github.john.tuesday.plugins.helper.ExperimentalProviderWithErrorMessageApi
 import io.github.john.tuesday.plugins.helper.propertyOrEnvironment
 import org.gradle.api.Project
+import org.gradle.api.logging.Logger
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
+import org.slf4j.LoggerFactory
+import javax.inject.Inject
 
 
 /**
@@ -22,13 +26,28 @@ public abstract class FilterTargetExtension {
      */
     public abstract val include: Property<Regex>
 
+    private val logger: Logger by lazy {
+        LoggerFactory.getLogger(Logger::class.java) as Logger
+    }
+
+    @get:Inject
+    protected abstract val providers: ProviderFactory
+
     /**
      * Returns a [Provider] which returns if [target] passes the filters and should be allowed
      */
-    public fun shouldRun(target: Provider<String>): Provider<Boolean> {
-        val includeMatch = include.zip(target) { regex, name -> regex.matches(name) }.orElse(Default.INCLUDE_RESULT)
-        val excludeMatch = exclude.zip(target) { regex, name -> regex.matches(name) }.orElse(Default.EXCLUDE_RESULT)
-        return includeMatch.zip(excludeMatch) { includeResult, excludeResult -> includeResult && !excludeResult }
+    public fun shouldRun(target: Provider<String>): Provider<Boolean> = target.flatMap { shouldRun(it) }
+
+    /**
+     * Returns a [Provider] which returns if [target] passes the filters and should be allowed
+     */
+    public fun shouldRun(target: String): Provider<Boolean> = providers.provider {
+        val includeMatch = include.map { regex -> regex.matches(target) }.getOrElse(Default.INCLUDE_RESULT)
+        val excludeMatch = exclude.map { regex -> regex.matches(target) }.getOrElse(Default.EXCLUDE_RESULT)
+        logger.info("target '$target'")
+        logger.info("include '${include.orNull?.pattern}' match=${includeMatch}")
+        logger.info("exclude '${exclude.orNull?.pattern}' match=${excludeMatch}")
+        includeMatch && !excludeMatch
     }
 
     /**
